@@ -1,0 +1,127 @@
+<marlin>
+  <execute>
+     <processor name="MyThrustReconstruction"/>
+     <!--processor name="MyFastJetProcessor_2"/>
+     
+     <processor name="MyFastJetProcessor_3"/>
+     <processor name="MyFastJetProcessor_4"/>
+     <processor name="MyFastJetProcessor_5"/>
+     <processor name="MyFastJetProcessor_6"/-->
+     <processor name="TautauAnalysisJets"/>
+  </execute>
+  <global>
+    <parameter name="LCIOInputFiles">     
+
+/r02/lc/xu/tau/PandoraBono/20160126am12/slcioZjetReco/ILD_o1_v06_whizard.ee_tautau_roots500.000_200_SiW_Reco.slcio
+/r02/lc/xu/tau/PandoraBono/20160126am12/slcioZjetReco/ILD_o1_v06_whizard.ee_tautau_roots500.000_0_SiW_Reco.slcio
+     
+
+    </parameter> <!--   /r02/lc/xu/myGridDownload/6243/e1e1_o_rec_6243_1.slcio-->
+    <parameter name="MaxRecordNumber" value="-1" />  
+    <parameter name="SupressCheck" value="true" />  
+    <parameter name="GearXMLFile">/usera/xu/ILCSOFT/TauAnalysis/steer/ILD_o1_v06_SiW_5x5.gear  </parameter> 
+    <!--/usera/xu/ILCSOFT/TauAnalysis/steer/ILD_o1_v06_SiW_5x5.gear /var/clus/usera/xu/ILCSOFT/PandoraTest/testCLIC_ILD/clic_ild_cdr.gear -->
+    <parameter name="Verbosity" options="DEBUG0-4,MESSAGE0-4,WARNING0-4,ERROR0-4,SILENT">DEBUG WARNING MESSAGE </parameter>
+  </global>
+
+
+  <processor name="MyThrustReconstruction" type="ThrustReconstruction">
+    <parameter name="inputCollectionName" type="string" lcioInType="ReconstructedParticle">PandoraPFOs</parameter>
+    <parameter name="typeOfThrustFinder"> 2 </parameter>
+  </processor>
+
+
+
+
+  <processor name="MyFastJetProcessor_6" type="FastJetProcessor">
+    <parameter name="algorithm" type="StringVec">kt_algorithm 1.5</parameter>
+    <parameter name="clusteringMode">ExclusiveNJets 6</parameter>
+    <parameter name="jetOut" type="string" lcioOutType="ReconstructedParticle">FJ_Jets_6 </parameter>
+    <parameter name="recParticleIn" type="string" lcioInType="ReconstructedParticle">PandoraPFOs</parameter>
+    <parameter name="recombinationScheme"> E_scheme </parameter>
+    <parameter name="findNrJets"> 6 </parameter>
+    <parameter name="findNrJetsCollectionPrefix"> ExclusiveJetOutput_6_ </parameter>
+  </processor>
+
+
+
+  <processor name="MyFastJetProcessor_5" type="FastJetProcessor">
+    <parameter name="algorithm" type="StringVec">kt_algorithm 1.5</parameter>
+    <parameter name="clusteringMode">ExclusiveNJets 5</parameter>
+    <parameter name="jetOut" type="string" lcioOutType="ReconstructedParticle">FJ_Jets_5 </parameter>
+    <parameter name="recParticleIn" type="string" lcioInType="ReconstructedParticle">PandoraPFOs</parameter>
+    <parameter name="recombinationScheme"> E_scheme </parameter>
+    <parameter name="findNrJets"> 5 </parameter>
+    <parameter name="findNrJetsCollectionPrefix"> ExclusiveJetOutput_5_ </parameter>
+  </processor>
+
+
+  <processor name="MyFastJetProcessor_4" type="FastJetProcessor">
+    <parameter name="algorithm" type="StringVec">kt_algorithm 1.5</parameter>
+    <parameter name="clusteringMode">ExclusiveNJets 4</parameter>
+    <parameter name="jetOut" type="string" lcioOutType="ReconstructedParticle">FJ_Jets_4 </parameter>
+    <parameter name="recParticleIn" type="string" lcioInType="ReconstructedParticle"> PandoraPFOs</parameter>
+    <parameter name="recombinationScheme"> E_scheme </parameter>
+    <parameter name="findNrJets"> 4 </parameter>
+    <parameter name="findNrJetsCollectionPrefix"> ExclusiveJetOutput_4_ </parameter>
+  </processor>
+
+
+  <processor name="MyFastJetProcessor_3" type="FastJetProcessor">
+    <parameter name="algorithm" type="StringVec">kt_algorithm 1.5</parameter>
+    <parameter name="clusteringMode">ExclusiveNJets 3</parameter>
+    <parameter name="jetOut" type="string" lcioOutType="ReconstructedParticle">FJ_Jets_3 </parameter>
+    <parameter name="recParticleIn" type="string" lcioInType="ReconstructedParticle">PandoraPFOs</parameter>
+    <parameter name="recombinationScheme"> E_scheme </parameter>
+    <parameter name="findNrJets"> 3 </parameter>
+    <parameter name="findNrJetsCollectionPrefix"> ExclusiveJetOutput_3_ </parameter>
+  </processor>
+
+
+  <processor name="MyFastJetProcessor_2" type="FastJetProcessor">
+    <parameter name="algorithm" type="StringVec">kt_algorithm 1.5</parameter>
+    <parameter name="clusteringMode">ExclusiveNJets 2</parameter>
+    <parameter name="jetOut" type="string" lcioOutType="ReconstructedParticle">FJ_Jets_2 </parameter>
+    <parameter name="recParticleIn" type="string" lcioInType="ReconstructedParticle">PandoraPFOs</parameter>
+    <parameter name="recombinationScheme"> E_scheme </parameter>
+    <parameter name="findNrJets"> 2 </parameter>
+    <parameter name="findNrJetsCollectionPrefix"> ExclusiveJetOutput_2_ </parameter>
+  </processor>
+  
+  
+
+
+
+  <processor name="TautauAnalysisJets" type="TautauAnalysis">    
+    <parameter name="PrintFlag" value="false" />  
+    <parameter name="TFileName" value="/var/clus/usera/xu/ILCSOFT/TauAnalysisNew/scripts/test.root" />  
+    <parameter name="TTreeName" value="sel" />  
+    <parameter name="TTreeID" value="sel" />  
+
+    <parameter name="PFOCollectionName" value="PandoraPFOs" />  
+    <parameter name="MCPFOCollectionName" value="MCParticle" /> 
+    <parameter name="RecoMCTruthLinkCollectionName" value="RecoMCTruthLink" /> 
+    
+    <parameter name="Jet6CollectionName" value="FJ_Jets_6" />  
+    <parameter name="Jet5CollectionName" value="FJ_Jets_5" />  
+    <parameter name="Jet4CollectionName" value="FJ_Jets_4" />  
+    <parameter name="Jet3CollectionName" value="FJ_Jets_3" />  
+    <parameter name="Jet2CollectionName" value="FJ_Jets_2" />  
+    
+    <parameter name="PreselOnly" value="1" />  
+    <parameter name="IntegratedLuminosity" value="1500." />  
+    <parameter name="ElectronPolarization" value="-0.00" />  
+    <parameter name="PositronPolarization" value="+0.00" />  
+    <parameter name="RootSEnergy" value="500." /> 
+    
+    
+  </processor>
+
+
+
+
+
+</marlin>
+
+
+ls /

@@ -1,0 +1,77 @@
+#include "PostFastJetProcessor.h"
+#include <iostream>
+#include <cmath>
+#include <cstdlib>
+#include <algorithm>
+
+#include <EVENT/LCCollection.h>
+#include <EVENT/MCParticle.h>
+#include <EVENT/ReconstructedParticle.h>
+
+
+// ----- include for verbosity dependend logging ---------
+#include "marlin/VerbosityLevels.h"
+
+using namespace lcio;
+using namespace marlin;
+
+PostFastJetProcessor aPostFastJetProcessor;
+
+PostFastJetProcessor::PostFastJetProcessor() : Processor("PostFastJetProcessor") 
+{
+
+}
+
+
+
+//-----------------------------------------------------------------------------------------------------------------------------------------
+
+void PostFastJetProcessor::init() 
+{ 
+    streamlog_out(DEBUG) << "   init called  " << std::endl;
+    printParameters() ;
+
+    m_nRun = 0;
+    m_nEvent = 0;
+
+}
+
+//-----------------------------------------------------------------------------------------------------------------------------------------
+
+void PostFastJetProcessor::processRunHeader(LCRunHeader *run)
+{ 
+    ++m_nRun;
+} 
+
+//-----------------------------------------------------------------------------------------------------------------------------------------
+
+void PostFastJetProcessor::processEvent(LCEvent *pEvent)
+{ 
+    if (m_nEvent % 500 == 0)
+        streamlog_out(MESSAGE) << "Run " << m_nRun << ", PostFastJetProcessor::processEvent: " << m_nEvent << std::endl;
+    if (0 == m_nEvent)
+    {
+       
+    }
+
+    ++m_nEvent;
+
+    
+}
+
+//-----------------------------------------------------------------------------------------------------------------------------------------
+
+void PostFastJetProcessor::check(LCEvent * pEvent)
+{ 
+    // nothing to check here - could be used to fill checkplots in reconstruction processor
+}
+
+//-----------------------------------------------------------------------------------------------------------------------------------------
+
+void PostFastJetProcessor::end()
+{
+    // End of program - write out histograms and tree
+   
+}
+
+
