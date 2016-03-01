@@ -8,7 +8,7 @@
 #include <map>
 
 #include "TTreeHelper.h"
-#include "MCHelper.h"
+
 using namespace lcio;
 using namespace marlin;
 
@@ -128,16 +128,6 @@ protected:
     void AnalysePionNutralMC(const MCParticle* pMCPion, int &nPhoton, int &nOther, bool &hasPhotonEarlyConversion) const;
     
     /**
-     *  @brief Get n pfo for a given pdg code
-     * 
-     *  @param pfoVec pointer to pfo vector 
-     *  @param pdgCode the pdg code of a particle
-     *  
-     *  @return Number of particle with that pdg code
-     */
-    int GetNPfo(const EVENT::ReconstructedParticleVec &pfoVec, const int pdgCode) const;
-    
-    /**
      *  @brief Get preselected particles
      * 
      *  @param pfoVec pointer to pfo vector 
@@ -172,6 +162,16 @@ protected:
      *  @return True if lhs energy > rhs energy
      */
     static bool SortRecoParticleByEnergyDescendingOrder(const ReconstructedParticle * lhs, const ReconstructedParticle * rhs);
+    
+    /**
+     *  @brief Chi squared fit for rho 770
+     * 
+     *  @param inputPfoVec input particles
+     *  @param outputPfoVec output particle to receive
+     * 
+     *  @return Chi squared
+     */
+    float Chi2FitRho770(const EVENT::ReconstructedParticleVec &inputPfoVec, EVENT::ReconstructedParticleVec &outputPfoVec) const;
     
     int                     m_nRun;                             // The counter for number of runs
     int                     m_nEvent;                           // The counter for number of events

@@ -24,10 +24,13 @@ public:
         E_EHCAL_RATIO,
         R0,
         M_VIS,
+        E_VIS,
         MC_CLOSE_Z,
         M_PHOTON,
+        E_PHOTON,
         M_NEUTRAL,
-        N_NEUTRAL
+        N_NEUTRAL,
+        E_NEUTRAL
     };
     
     static std::string GetName(VARIABLE var)
@@ -62,14 +65,20 @@ public:
                 return "R0";
             case M_VIS:
                 return "mVis";
+            case E_VIS:
+                return "eVis";
             case MC_CLOSE_Z:
                 return "mcCloseToZ";
             case M_PHOTON:
                 return "mPhoton";
+            case E_PHOTON:
+                return "ePhoton";
             case M_NEUTRAL:
                 return "mNeutral";
             case N_NEUTRAL:
                 return "nNeutral";
+            case E_NEUTRAL:
+                return "eNeutral";
             default:
                 return "unknown";
                 break;

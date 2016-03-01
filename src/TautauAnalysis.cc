@@ -13,8 +13,11 @@
 
 #include "TLorentzVector.h"
 
+#include "AlgorithmHelper.h"
 #include "VarName.h"
 #include "PdgTable.h"
+#include "MCHelper.h"
+#include "RecoHelper.h"
 
 // ----- include for verbosity dependend logging ---------
 #include "marlin/VerbosityLevels.h"
@@ -374,10 +377,10 @@ void TautauAnalysis::AnalyseHemisphereMC(const MCParticle* pMainMC, LCCollection
 
 void TautauAnalysis::AnalyseHemisphereReco(const EVENT::ReconstructedParticleVec &pfoVec, LCCollection* pPfoCollection)
 {
-    m_pTTreeHelper->SetIntVar(VarName::GetName(VarName::N_PHOTON),  this->GetNPfo(pfoVec, PHOTON));
-    m_pTTreeHelper->SetIntVar(VarName::GetName(VarName::N_E),  this->GetNPfo(pfoVec, E_MINUS));
-    m_pTTreeHelper->SetIntVar(VarName::GetName(VarName::N_MU),  this->GetNPfo(pfoVec, MU_MINUS));
-    m_pTTreeHelper->SetIntVar(VarName::GetName(VarName::N_PIONCHARGE),  this->GetNPfo(pfoVec, PI_PLUS));
+    m_pTTreeHelper->SetIntVar(VarName::GetName(VarName::N_PHOTON),  RecoHelper::GetNPfo(pfoVec, PHOTON));
+    m_pTTreeHelper->SetIntVar(VarName::GetName(VarName::N_E),  RecoHelper::GetNPfo(pfoVec, E_MINUS));
+    m_pTTreeHelper->SetIntVar(VarName::GetName(VarName::N_MU),  RecoHelper::GetNPfo(pfoVec, MU_MINUS));
+    m_pTTreeHelper->SetIntVar(VarName::GetName(VarName::N_PIONCHARGE),  RecoHelper::GetNPfo(pfoVec, PI_PLUS));
     m_pTTreeHelper->SetIntVar(VarName::GetName(VarName::N_PFO),  pfoVec.size());
     
     int nCharge(0), nNeutral(0);
@@ -432,10 +435,13 @@ void TautauAnalysis::AnalyseHemisphereReco(const EVENT::ReconstructedParticleVec
     m_pTTreeHelper->SetDoubleVar(VarName::GetName(VarName::E_EHCAL_RATIO),  eEHCalRatio);
     m_pTTreeHelper->SetDoubleVar(VarName::GetName(VarName::R0), r0);
     m_pTTreeHelper->SetDoubleVar(VarName::GetName(VarName::M_VIS), visMom.M());
+    m_pTTreeHelper->SetDoubleVar(VarName::GetName(VarName::E_VIS), visMom.E());
     m_pTTreeHelper->SetDoubleVar(VarName::GetName(VarName::M_PHOTON), photonMom.M());
+    m_pTTreeHelper->SetDoubleVar(VarName::GetName(VarName::E_PHOTON), photonMom.E());
     m_pTTreeHelper->SetDoubleVar(VarName::GetName(VarName::M_NEUTRAL), neutralMom.M());
     m_pTTreeHelper->SetIntVar(VarName::GetName(VarName::N_NEUTRAL),  nNeutral);
-    
+    m_pTTreeHelper->SetDoubleVar(VarName::GetName(VarName::E_NEUTRAL), neutralMom.E());
+
 }
 
 //-----------------------------------------------------------------------------------------------------------------------------------------
@@ -587,19 +593,6 @@ void TautauAnalysis::AnalysePionNutralMC(const MCParticle* pMCPion, int &nPhoton
 
 //-----------------------------------------------------------------------------------------------------------------------------------------
 
-int TautauAnalysis::GetNPfo(const EVENT::ReconstructedParticleVec &pfoVec, const int pdgCode) const
-{
-    int nPfo(0);
-    for (EVENT::ReconstructedParticleVec::const_iterator iter = pfoVec.begin(), iterEnd = pfoVec.end(); iter != iterEnd; ++iter)
-    {
-        if (std::fabs((*iter)->getType()) == std::fabs(pdgCode))
-            nPfo++;
-    }
-    return nPfo;
-}
-
-//-----------------------------------------------------------------------------------------------------------------------------------------
-
 EVENT::ReconstructedParticleVec TautauAnalysis::GetPreselectedParticles(const EVENT::ReconstructedParticleVec &pfoVec) const
 {
     ReconstructedParticleVec preselectedPfoVec;
@@ -676,4 +669,54 @@ bool TautauAnalysis::IsParticleInZAngle(const double *momentum, const float minZ
 bool TautauAnalysis::SortRecoParticleByEnergyDescendingOrder(const ReconstructedParticle * lhs, const ReconstructedParticle * rhs)
 {
     return lhs->getEnergy() > rhs->getEnergy();
+}
+
+//-----------------------------------------------------------------------------------------------------------------------------------------
+float TautauAnalysis::Chi2FitRho770(const EVENT::ReconstructedParticleVec &inputPfoVec, EVENT::ReconstructedParticleVec &outputPfoVec) const
+{
+    EVENT::ReconstructedParticleVec pionChargedVec, photonVec;
+    for (EVENT::ReconstructedParticleVec::const_iterator iter = inputPfoVec.begin(), iterEnd = inputPfoVec.end(); iter != iterEnd; ++iter)
+    {
+        ReconstructedParticle *pReco(*iter);
+        const int pdg(std::fabs(pReco->getType()));
+        if (PI_PLUS == pdg)
+        {
+            pionChargedVec.push_back(pReco);
+        }
+        else if (PHOTON == pdg)
+        {
+            photonVec.push_back(pReco);
+        }
+    }
+
+    std::size_t n = 5;
+    std::size_t k = 3;
+
+    std::vector<int> ints;
+    for (int i = 0; i < n; ints.push_back(i++));
+
+    do
+    {
+       for (int i = 0; i < k; ++i)
+       {
+          std::cout << ints[i];
+       }
+       std::cout << "\n";
+    }
+    while(AlgorithmHelper::next_combination(ints.begin(),ints.begin() + k,ints.end()));
+    
+    
+
+    for (EVENT::ReconstructedParticleVec::const_iterator iter = pionChargedVec.begin(), iterEnd = pionChargedVec.end(); iter != iterEnd; ++iter)
+    {
+        ReconstructedParticle *pPionCharge(*iter);
+        for (EVENT::ReconstructedParticleVec::const_iterator jIter = photonVec.begin(), jIterEnd = photonVec.end(); jIter != jIterEnd; ++jIter)
+        {
+            ReconstructedParticle *pPhotonLhs(*jIter);
+            for (EVENT::ReconstructedParticleVec::const_iterator jIter = photonVec.begin(), jIterEnd = photonVec.end(); jIter != jIterEnd; ++jIter)
+            {
+                ReconstructedParticle *pPhotonLhs(*jIter);
+            }
+        }
+    }
 }
