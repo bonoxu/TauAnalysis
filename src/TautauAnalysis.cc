@@ -92,7 +92,8 @@ void TautauAnalysis::processEvent(LCEvent *pEvent)
 { 
     if (m_nEvent % 500 == 0)
         streamlog_out(MESSAGE) << "Run " << m_nRun << ", TautauAnalysis::processEvent: " << m_nEvent << std::endl;
-
+    streamlog_out(DEBUG) << "Run " << m_nRun << ", TautauAnalysis::processEvent: " << m_nEvent << std::endl;
+    
     // DEBUG
     if(m_nEvent==0)
     {
@@ -113,17 +114,17 @@ void TautauAnalysis::processEvent(LCEvent *pEvent)
     this->GetPfosInHemisphere(pPfoCollection, pfoVecMinus, pfoVecPlus);
 
     // DEBUG
-    streamlog_out(DEBUG) << " nPFO in plus: " << pfoVecPlus.size() << " pdg: ";
-    for (ReconstructedParticleVec::const_iterator iter = pfoVecPlus.begin(), iterEnd = pfoVecPlus.end(); iter != iterEnd; ++iter)
-        streamlog_out(DEBUG) << (*iter)->getType() << ",";
-    streamlog_out(DEBUG) << " minus: " << pfoVecMinus.size() << " pdg: "; 
-    for (ReconstructedParticleVec::const_iterator iter = pfoVecMinus.begin(), iterEnd = pfoVecMinus.end(); iter != iterEnd; ++iter)
-        streamlog_out(DEBUG) << (*iter)->getType() << ",";
-    streamlog_out(DEBUG)<< std::endl;
+
+
     
     MCHelper::MCMCMap McToTauMCMap;
     MCHelper::AddAllDaughtersToMap(m_pMCTauMinus, McToTauMCMap);
     MCHelper::AddAllDaughtersToMap(m_pMCTauPlus, McToTauMCMap);
+    
+    /*for (MCHelper::MCMCMap::const_iterator iter = McToTauMCMap.begin(), iterEnd = McToTauMCMap.end(); iter != iterEnd; ++iter)
+    {
+        std::cout<< " McToTauMCMap "<< iter->first << " : " << iter->second << std::endl;
+    }*/
     
     // DEBUG
     streamlog_out(DEBUG) << " nMCPFO in tau: " << McToTauMCMap.size() << std::endl;
@@ -137,11 +138,21 @@ void TautauAnalysis::processEvent(LCEvent *pEvent)
     streamlog_out(DEBUG) << " +ve hemi is " << ((pPlusMC == m_pMCTauPlus) ? " plus mc " : " minus mc ") << " -ve hemi is " << ((pMinusMC == m_pMCTauPlus) ? " plus mc " : " minus mc ") << std::endl;
     
     // DEBUG
-    streamlog_out(DEBUG) << " +ve hemi process" << std::endl;
+    streamlog_out(DEBUG) << " +ve hemi process nPFO in plus: " << pfoVecPlus.size() << " pdg: ";
+    for (ReconstructedParticleVec::const_iterator iter = pfoVecPlus.begin(), iterEnd = pfoVecPlus.end(); iter != iterEnd; ++iter)
+        streamlog_out(DEBUG) << (*iter)->getType() << "," ;
+    streamlog_out(DEBUG)<< std::endl;
+    
     this->AnalyseHemisphere(pfoVecPlus, pPfoCollection, pPlusMC, pMCPfoCollection);
-    streamlog_out(DEBUG) << " -ve hemi process" << std::endl;
+    
+    streamlog_out(DEBUG) << " -ve hemi process nPFO in minus: " << pfoVecMinus.size() << " pdg: "; 
+    for (ReconstructedParticleVec::const_iterator iter = pfoVecMinus.begin(), iterEnd = pfoVecMinus.end(); iter != iterEnd; ++iter)
+        streamlog_out(DEBUG) << (*iter)->getType() << ",";
+    streamlog_out(DEBUG)<< std::endl;
+    
     this->AnalyseHemisphere(pfoVecMinus, pPfoCollection, pMinusMC, pMCPfoCollection);
-
+    //if (pPlusMC == pMinusMC)
+    //    std::cin.get();
 }
 
 //-----------------------------------------------------------------------------------------------------------------------------------------
@@ -227,8 +238,8 @@ void TautauAnalysis::AnalyseHemisphere(const ReconstructedParticleVec &pfoVec, L
     streamlog_out(DEBUG) << " analyse MC " << std::endl;
     this->AnalyseHemisphereMC(pMainMC, pMCPfoCollection);
     
-    ReconstructedParticleVec preselectedPfoVec = this->GetPreselectedParticles(pfoVec);
-    this->AnalyseHemisphereReco(preselectedPfoVec, pPfoCollection);
+    //ReconstructedParticleVec preselectedPfoVec = this->GetPreselectedParticles(pfoVec);
+    this->AnalyseHemisphereReco(pfoVec, pPfoCollection);
     
     m_pTTreeHelper->FillNode();
 }
@@ -237,7 +248,7 @@ void TautauAnalysis::AnalyseHemisphere(const ReconstructedParticleVec &pfoVec, L
 
 void TautauAnalysis::AnalyseHemisphereMC(const MCParticle* pMainMC, LCCollection* pMCPfoCollection)
 {
-    int nE(0), nMu(0), nPionCharge(0), nPhotonFromPion(0), nOther(0), nNuE(0), nNuMu(0), nNuTau(0);
+    int nE(0), nMu(0), nPionCharge(0), nPhotonFromPion(0), nOther(0), nNuE(0), nNuMu(0), nNuTau(0), nFSRPhoton(0);
     bool photonEarlyConversion(false), particleCloseToZ(false);
     if (pMainMC)
     {
@@ -274,25 +285,33 @@ void TautauAnalysis::AnalyseHemisphereMC(const MCParticle* pMainMC, LCCollection
                     this->AnalysePionNutralMC(pMCDaughter, nPhotonFromPion, nOther, photonEarlyConversion);
                     break;
                 }
+                case PHOTON:
+                    nFSRPhoton++;
+                    break;
                 case RHO_770_PLUS:
                 case A1_1260_PLUS:
+                case W_PLUS:
                 {
-                    const EVENT::MCParticleVec mcRhoDaughterVec(pMCDaughter->getDaughters());
-                    for (EVENT::MCParticleVec::const_iterator jIter = mcRhoDaughterVec.begin(), jIterEnd = mcRhoDaughterVec.end(); jIter != jIterEnd; ++jIter)
+                    const EVENT::MCParticleVec mcDaughterDaughterVec(pMCDaughter->getDaughters());
+                    for (EVENT::MCParticleVec::const_iterator jIter = mcDaughterDaughterVec.begin(), jIterEnd = mcDaughterDaughterVec.end(); jIter != jIterEnd; ++jIter)
                     {
-                        const MCParticle* pMCRhoDaughter(*jIter);
-                        const int rhoDaughterPDG(std::fabs(pMCRhoDaughter->getPDG()));
-                        if (PI_PLUS == rhoDaughterPDG)
+                        const MCParticle* pMCDaughterDaughter(*jIter);
+                        const int daughterDaughterPDG(std::fabs(pMCDaughterDaughter->getPDG()));
+                        if (PI_PLUS == daughterDaughterPDG)
                         {
                             nPionCharge++;
                         }
-                        else if (PI_ZERO == rhoDaughterPDG)
+                        else if (PI_ZERO == daughterDaughterPDG)
                         {
-                            this->AnalysePionNutralMC(pMCRhoDaughter, nPhotonFromPion, nOther, photonEarlyConversion);
+                            this->AnalysePionNutralMC(pMCDaughterDaughter, nPhotonFromPion, nOther, photonEarlyConversion);
+                        }
+                        else if (PHOTON == daughterDaughterPDG)
+                        {
+                            nFSRPhoton++;
                         }
                         else
                         {
-                            streamlog_out(DEBUG) << " rhoDaughterPDG " << rhoDaughterPDG << std::endl;
+                            streamlog_out(DEBUG) << " daughterDaughterPDG " << daughterDaughterPDG << std::endl;
                             nOther++;
                         }
                     }
@@ -307,8 +326,8 @@ void TautauAnalysis::AnalyseHemisphereMC(const MCParticle* pMainMC, LCCollection
     }
 
     // DEBUG
-    streamlog_out(DEBUG) << "nNuTau, nE, nNuE, nMu, nNuMu, nPionCharge, nPhotonFromPion, nOther: " << nNuTau << "," << nE << "," << nNuE << "," << nMu << "," << nNuMu << "," <<
-        nPionCharge << "," << nPhotonFromPion << "," << nOther << "," << " early conversion " << photonEarlyConversion << std::endl;
+    streamlog_out(DEBUG) << "nNuTau, nE, nNuE, nMu, nNuMu, nPionCharge, nPhotonFromPion, nOther, nFSRPhoton: " << nNuTau << "," << nE << "," << nNuE << "," << nMu << "," << nNuMu << "," <<
+        nPionCharge << "," << nPhotonFromPion << "," << nOther << "," << nFSRPhoton << " early conversion " << photonEarlyConversion << std::endl;
 
     // Event selection
     const int nTotal(nNuTau + nE + nNuE + nMu + nNuMu + nPionCharge + nPhotonFromPion + nOther);
@@ -337,15 +356,18 @@ void TautauAnalysis::AnalyseHemisphereMC(const MCParticle* pMainMC, LCCollection
     {
         tauDecayFinalState = PION2PION;
     }
-    
+    else if (1 == nNuTau && 3 == nPionCharge && 2 == nPhotonFromPion && 6 == nTotal)
+    {
+        tauDecayFinalState = PION2PION2PHOTON;
+    }
     // DEBUG
     streamlog_out(DEBUG) << "Tau dacay final state " << tauDecayFinalState << std::endl;
     
     m_pTTreeHelper->SetIntVar(VarName::GetName(VarName::EVENT_TYPE), tauDecayFinalState);
     m_pTTreeHelper->SetIntVar(VarName::GetName(VarName::PHOTON_EARLY_CONVERSION), photonEarlyConversion);
     m_pTTreeHelper->SetIntVar(VarName::GetName(VarName::MC_CLOSE_Z), particleCloseToZ);
-    
-    //streamlog_out(DEBUG) << "particleCloseToZ " << particleCloseToZ << std::endl;
+    m_pTTreeHelper->SetIntVar(VarName::GetName(VarName::PHOTON_FSR), nFSRPhoton);
+    streamlog_out(DEBUG) << "particleCloseToZ " << particleCloseToZ << std::endl;
 }
 
 //-----------------------------------------------------------------------------------------------------------------------------------------
@@ -553,6 +575,7 @@ void TautauAnalysis::AnalysePionNutralMC(const MCParticle* pMCPion, int &nPhoton
             nPhoton++;
             streamlog_out(DEBUG) << " TautauAnalysis::AnalysePionNutralMC photon energy"  << pMCPionDaughter->getEnergy() << std::endl;
             if (pMCPionDaughter->isDecayedInTracker())
+            //if (!pMCPionDaughter->getDaughters().empty())
                 hasPhotonEarlyConversion = true;
         }
         else

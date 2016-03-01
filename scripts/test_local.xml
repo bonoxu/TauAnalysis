@@ -12,14 +12,14 @@
   <global>
     <parameter name="LCIOInputFiles">     
 
-/r02/lc/xu/tau/PandoraBono/20160126am12/slcioZjetReco/ILD_o1_v06_whizard.ee_tautau_roots500.000_200_SiW_Reco.slcio
-/r02/lc/xu/tau/PandoraBono/20160126am12/slcioZjetReco/ILD_o1_v06_whizard.ee_tautau_roots500.000_0_SiW_Reco.slcio
+/r02/lc/xu/tau/PandoraBonoNew/200GeV/slcioZjetReco/whizard.ee_tautau_roots200.001_Tau_200GeV_00_Start0_Reco.slcio
      
 
     </parameter> <!--   /r02/lc/xu/myGridDownload/6243/e1e1_o_rec_6243_1.slcio-->
     <parameter name="MaxRecordNumber" value="-1" />  
+    <parameter name="SkipNEvents" value="-1"/>
     <parameter name="SupressCheck" value="true" />  
-    <parameter name="GearXMLFile">/usera/xu/ILCSOFT/TauAnalysis/steer/ILD_o1_v06_SiW_5x5.gear  </parameter> 
+    <parameter name="GearXMLFile">/usera/xu/ILCSOFT/myGridDownload/ILD_o1_v06_SiW_5x5.gear  </parameter> 
     <!--/usera/xu/ILCSOFT/TauAnalysis/steer/ILD_o1_v06_SiW_5x5.gear /var/clus/usera/xu/ILCSOFT/PandoraTest/testCLIC_ILD/clic_ild_cdr.gear -->
     <parameter name="Verbosity" options="DEBUG0-4,MESSAGE0-4,WARNING0-4,ERROR0-4,SILENT">DEBUG WARNING MESSAGE </parameter>
   </global>
@@ -27,7 +27,7 @@
 
   <processor name="MyThrustReconstruction" type="ThrustReconstruction">
     <parameter name="inputCollectionName" type="string" lcioInType="ReconstructedParticle">PandoraPFOs</parameter>
-    <parameter name="typeOfThrustFinder"> 2 </parameter>
+    <parameter name="typeOfThrustFinder"> 1 </parameter>
   </processor>
 
 

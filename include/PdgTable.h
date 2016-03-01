@@ -50,6 +50,8 @@
     d(RHO_770_MINUS,      -213,            7.7E-01f,             1.5E-1f,      -1)      \
     d(A1_1260_PLUS,      20213,           1.23E+00f,              4.E-1f,      +1)      \
     d(A1_1260_MINUS,    -20213,           1.23E+00f,              4.E-1f,      -1)      \
+    d(W_MINUS,             -24,          8.385E+01f,          2.085E+00f,      -1)      \
+    d(W_PLUS,               24,          8.385E+01f,          2.085E+00f,      +1)      \
 
 /**
  *  @brief  The particle type enum macro

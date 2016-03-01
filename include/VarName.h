@@ -14,6 +14,7 @@ public:
         THRUST_PRINCIPLE,
         EVENT_TYPE,
         PHOTON_EARLY_CONVERSION,
+        PHOTON_FSR,
         N_PHOTON,
         N_PIONCHARGE,
         N_MU,
@@ -41,6 +42,8 @@ public:
                 return "eventType";
             case PHOTON_EARLY_CONVERSION:
                 return "photonEC";
+            case PHOTON_FSR:
+                return "photonFSR";
             case N_PHOTON:
                 return "nPhoton";
             case N_PIONCHARGE:

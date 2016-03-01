@@ -3,6 +3,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <limits>
+#include <algorithm>
 
 #include <EVENT/LCCollection.h>
 #include <EVENT/MCParticle.h>
@@ -30,7 +31,7 @@ void MCHelper::PrintMC(const LCCollection* pMCPfoCollection, const int maxNFfo)
         const double p2(px * px + py * py + pz * pz);
         const double p(p2 > std::numeric_limits<double>::epsilon() ? 0.f : std::sqrt(p2));
         // print
-        std::cout << i << " : " << pMCparticle->getPDG() << " E:" << pMCparticle->getEnergy() << " P:" << p /*<< ":"<<px<<":"<<py<<":"<<pz*/ <<
+        std::cout << i << " " << pMCparticle << " : " << pMCparticle->getPDG() << " E:" << pMCparticle->getEnergy() << " P:" << p /*<< ":"<<px<<":"<<py<<":"<<pz*/ <<
             " M:" << pMCparticle->getMass();// << " nPa:" << _parents.size() << " nD:" << _daughters.size() ;
             
         std::cout << " PaPdg ";
@@ -118,6 +119,7 @@ const MCParticle* MCHelper::GetMCParticle(const ReconstructedParticle* pReco, co
 {
     const LCObjectVec &mcParticlesVec(pRecoMCNavigator->getRelatedToObjects(const_cast<ReconstructedParticle*>(pReco)));
     if (mcParticlesVec.empty()) return NULL;
+    //std::cout << "MCHelper::GetMCParticle mc raw " << mcParticlesVec.at(0) << " reco " << pReco << std::endl;
     
     const MCParticle *pMC(dynamic_cast<MCParticle*>(mcParticlesVec.at(0)));
     if (daughterMcToMCMap.find(pMC) != daughterMcToMCMap.end())
@@ -141,6 +143,7 @@ const MCParticle* MCHelper::GetMCParticle(const ReconstructedParticleVec &recoVe
         const ReconstructedParticle* pReco(*iter);
         const float recoEnergy(pReco->getEnergy());
         const MCParticle* pMC(GetMCParticle(pReco, pRecoMCNavigator, daughterMcToMCMap));
+        //std::cout << "MCHelper::GetMCParticle to insert mc " << pMC << " reco " << pReco << " type " << pReco->getType() << " e " << recoEnergy << std::endl;
         if (mcEnergyMap.find(pMC) != mcEnergyMap.end())
         {
             mcEnergyMap.at(pMC) += recoEnergy;
@@ -151,13 +154,18 @@ const MCParticle* MCHelper::GetMCParticle(const ReconstructedParticleVec &recoVe
                 std::cout << "MCHelper::GetMCParticle failed to insert mc " << pMC << " reco " << pReco << std::endl;
         }
     }
-    
-    if (!mcEnergyMap.empty())
+
+    const MCParticle* pBestMC(NULL);
+    float highestE(0.f);
+    for (MCFloatMap::const_iterator iter = mcEnergyMap.begin(), iterEnd = mcEnergyMap.end(); iter != iterEnd; ++iter)
     {
-        return mcEnergyMap.rbegin()->first;
+        if (iter->second > highestE && iter->first)
+        {
+            highestE = iter->second;
+            pBestMC = iter->first;
+        }
+        //std::cout << "MCHelper::GetMCParticle mc " << iter->first << " e " << iter->second << std::endl;
     }
-    else
-    {
-        return NULL;
-    }
+    //std::cout << "MCHelper::GetMCParticle best mc " << pBestMC << " e " << highestE << std::endl;
+    return pBestMC;
 }

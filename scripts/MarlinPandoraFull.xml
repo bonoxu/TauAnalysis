@@ -36,22 +36,21 @@
      <processor name="MyRecoMCTruthLinker"/>
      <processor name="MyMarlinPandora"/>
      <!--processor name="MyPfoAnalysis"/-->
-     <!--processor name="MyMarlinPandora2"/-->
+     <processor name="MyMarlinPandora2"/>
      <!--processor name="MyPfoAnalysis2"/-->
      <!--processor name="MyMarlinPandora3"/-->
    </execute>
 
    <global> <!--   -->
       <parameter name="LCIOInputFiles">
-/r02/lc/xu/tau/PandoraBono/20160126am12/slcioZjetReco/ILD_o1_v06_whizard.ee_tautau_roots500.000_200_SiW_Reco.slcio
-/r02/lc/xu/tau/PandoraBono/20160126am12/slcioZjetReco/ILD_o1_v06_whizard.ee_tautau_roots500.000_0_SiW_Reco.slcio
+/r02/lc/xu/myGridDownload/tautauBono/200GeV/whizard.ee_tautau_roots200.001_Tau_200GeV_00_Start0.slcio
 
 
       </parameter>
-      <parameter name="GearXMLFile" value="/var/clus/usera/xu/ILCSOFT/TauAnalysis/steer/ILD_o1_v06_SiW_5x5.gear"/>
+      <parameter name="GearXMLFile" value="/usera/xu/ILCSOFT/myGridDownload/ILD_o1_v06_SiW_5x5.gear"/>
       <!--../test/gear.xml /r02/lc/xu/udsJet/list/ILD_o1_v05_SiW_5x5.gear /var/clus/usera/xu/ILCSOFT/TauAnalysis/steer/ILD_o1_v06_SiW_5x5.gear /usera/xu/ILCSOFT/myGridDownload/ILD_o1_v06_SiW_5x5.gear /r02/lc/xu/eMinus/20150928/gear/ILD_o1_v05_SiW_5x5.gear-->
       <parameter name="MaxRecordNumber" value="-1"/>
-      <parameter name="SkipNEvents" value="-1"/>
+      <parameter name="SkipNEvents" value="113"/>
       <parameter name="SupressCheck" value="false"/>
       <parameter name="Verbosity" options="DEBUG0-4,MESSAGE0-4,WARNING0-4,ERROR0-4,SILENT"> MESSAGE </parameter>
       <parameter name="RandomSeed" value="1234567890" />
@@ -923,8 +922,8 @@
   <!-- Calibration constants -->
   <parameter name="ECalToMipCalibration" type="float">160.0</parameter>
   <parameter name="HCalToMipCalibration" type="float">34.8</parameter>
-  <parameter name="ECalMipThreshold" type="float">0.0</parameter>
-  <parameter name="HCalMipThreshold" type="float">0.0</parameter>
+  <parameter name="ECalMipThreshold" type="float">0.5</parameter>
+  <parameter name="HCalMipThreshold" type="float">0.3</parameter>
   <parameter name="ECalToEMGeVCalibration" type="float">1.007</parameter>
   <parameter name="HCalToEMGeVCalibration" type="float">1.007</parameter>
   <parameter name="ECalToHadGeVCalibrationBarrel" type="float">1.075</parameter>

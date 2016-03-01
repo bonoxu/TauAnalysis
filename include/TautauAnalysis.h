@@ -49,6 +49,7 @@ protected:
         PION2PHOTON = 4,
         PION4PHOTON = 5,
         PION2PION = 6,
+        PION2PION2PHOTON = 7,
         OTHER = 0
     };
     
