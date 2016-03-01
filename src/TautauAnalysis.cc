@@ -402,8 +402,7 @@ void TautauAnalysis::AnalyseHemisphereReco(const EVENT::ReconstructedParticleVec
     const double eEHCalRatio((eECal + eHCal > std::numeric_limits<double>::epsilon()) ? eECal / (eECal + eHCal) : std::numeric_limits<double>::max());
 
     ReconstructedParticleVec photonVec(RecoHelper::GetPfoVec(pfoVec, PHOTON));
-    const TLorentzVector photonMom(RecoHelper::GetMomFromRecoParticleVec(photonVec));
-    
+
     // debug
     std::sort(photonVec.begin(), photonVec.end(), RecoHelper::SortRecoParticleByEnergyDescendingOrder);
     for (EVENT::ReconstructedParticleVec::const_iterator iter = photonVec.begin(), iterEnd = photonVec.end(); iter != iterEnd; ++iter)
@@ -411,11 +410,18 @@ void TautauAnalysis::AnalyseHemisphereReco(const EVENT::ReconstructedParticleVec
         streamlog_out(DEBUG) << "photon E " << (*iter)->getEnergy() << std::endl;
     }
     
-    const TLorentzVector visMom(RecoHelper::GetMomFromRecoParticleVec(pfoVec));
-    const TLorentzVector chargeMom(RecoHelper::GetMomFromRecoParticleVec(chargeVec));
-    const TLorentzVector neutralMom(RecoHelper::GetMomFromRecoParticleVec(neutralVec));
+    ReconstructedParticleVec muonVec(RecoHelper::GetPfoVec(pfoVec, MU_MINUS));
+    ReconstructedParticleVec electronVec(RecoHelper::GetPfoVec(pfoVec, E_MINUS));
+    ReconstructedParticleVec pionChargeVec(RecoHelper::GetPfoVec(pfoVec, PI_PLUS));
     
-    const int nPhoton(RecoHelper::GetNPfo(pfoVec, PHOTON)), nPionCharge(RecoHelper::GetNPfo(pfoVec, PI_PLUS));
+    const TLorentzVector visMom(RecoHelper::GetMomFromRecoParticleVec(pfoVec)), chargeMom(RecoHelper::GetMomFromRecoParticleVec(chargeVec)), 
+        neutralMom(RecoHelper::GetMomFromRecoParticleVec(neutralVec)), photonMom(RecoHelper::GetMomFromRecoParticleVec(photonVec)), 
+        electronMom(RecoHelper::GetMomFromRecoParticleVec(electronVec)), muonMom(RecoHelper::GetMomFromRecoParticleVec(muonVec)), 
+        pionChargeMom(RecoHelper::GetMomFromRecoParticleVec(pionChargeVec));
+    
+    const int nPhoton(RecoHelper::GetNPfo(pfoVec, PHOTON)), nPionCharge(pionChargeVec.size());
+    
+    // rho test
     float rhoChi2(std::numeric_limits<float>::max());
     ReconstructedParticleVec rhoFitPionChargeVec, rhoFitPhotonVec;
     if (nPionCharge > 0  && nPhoton > 1)
@@ -431,21 +437,38 @@ void TautauAnalysis::AnalyseHemisphereReco(const EVENT::ReconstructedParticleVec
         rhoFitCosStarPhoton = RecoHelper::GetCosineInCoMFrame(RecoHelper::GetMomFromRecoParticle(rhoFitPhotonVec[0]), RecoHelper::GetMomFromRecoParticle(rhoFitPhotonVec[1]));
     }
 
-    m_pTTreeHelper->SetIntVar(VarName::GetName(VarName::N_PHOTON), nPhoton);
-    m_pTTreeHelper->SetIntVar(VarName::GetName(VarName::N_E),  RecoHelper::GetNPfo(pfoVec, E_MINUS));
-    m_pTTreeHelper->SetIntVar(VarName::GetName(VarName::N_MU),  RecoHelper::GetNPfo(pfoVec, MU_MINUS));
-    m_pTTreeHelper->SetIntVar(VarName::GetName(VarName::N_PIONCHARGE), nPionCharge);
-    m_pTTreeHelper->SetIntVar(VarName::GetName(VarName::N_PFO),  pfoVec.size());
-    m_pTTreeHelper->SetIntVar(VarName::GetName(VarName::N_CHARGE),  chargeVec.size());
+    // a1 test
+
     m_pTTreeHelper->SetDoubleVar(VarName::GetName(VarName::E_EHCAL_RATIO),  eEHCalRatio);
+
     m_pTTreeHelper->SetDoubleVar(VarName::GetName(VarName::M_VIS), visMom.M());
     m_pTTreeHelper->SetDoubleVar(VarName::GetName(VarName::E_VIS), visMom.E());
+    m_pTTreeHelper->SetIntVar(VarName::GetName(VarName::N_PFO),  pfoVec.size());
+    
+    m_pTTreeHelper->SetIntVar(VarName::GetName(VarName::N_NEUTRAL),  neutralVec.size());
+    m_pTTreeHelper->SetDoubleVar(VarName::GetName(VarName::M_NEUTRAL), neutralMom.M());
+    m_pTTreeHelper->SetDoubleVar(VarName::GetName(VarName::E_NEUTRAL), neutralMom.E());
+    
+    m_pTTreeHelper->SetIntVar(VarName::GetName(VarName::N_CHARGE),  chargeVec.size());
+    
+    m_pTTreeHelper->SetIntVar(VarName::GetName(VarName::N_MU),  muonVec.size());
+    m_pTTreeHelper->SetIntVar(VarName::GetName(VarName::E_MU),  muonMom.E());
+    
+    m_pTTreeHelper->SetIntVar(VarName::GetName(VarName::N_E),  electronVec.size());
+    m_pTTreeHelper->SetIntVar(VarName::GetName(VarName::E_E),  electronMom.E());
+    
+    m_pTTreeHelper->SetIntVar(VarName::GetName(VarName::N_PHOTON), nPhoton);
     m_pTTreeHelper->SetDoubleVar(VarName::GetName(VarName::M_PHOTON), photonMom.M());
     m_pTTreeHelper->SetDoubleVar(VarName::GetName(VarName::E_PHOTON), photonMom.E());
-    m_pTTreeHelper->SetDoubleVar(VarName::GetName(VarName::M_NEUTRAL), neutralMom.M());
-    m_pTTreeHelper->SetIntVar(VarName::GetName(VarName::N_NEUTRAL),  neutralVec.size());
-    m_pTTreeHelper->SetDoubleVar(VarName::GetName(VarName::E_NEUTRAL), neutralMom.E());
 
+    m_pTTreeHelper->SetIntVar(VarName::GetName(VarName::N_PIONCHARGE), nPionCharge);
+    m_pTTreeHelper->SetIntVar(VarName::GetName(VarName::M_PIONCHARGE), pionChargeMom.M());
+    m_pTTreeHelper->SetIntVar(VarName::GetName(VarName::E_PIONCHARGE), pionChargeMom.E());
+
+    m_pTTreeHelper->SetDoubleVar(VarName::GetName(VarName::LOGCHI_RHOFIT), rhoChi2NegLog);
+    m_pTTreeHelper->SetDoubleVar(VarName::GetName(VarName::M_PION_RHOFIT), rhoFitPionZeroM);
+    m_pTTreeHelper->SetDoubleVar(VarName::GetName(VarName::M_RHO_RHOFIT), rhoFitRhoM);
+    m_pTTreeHelper->SetDoubleVar(VarName::GetName(VarName::COSSTAR_RHOFIT), rhoFitCosStarPhoton);
 }
 
 //-----------------------------------------------------------------------------------------------------------------------------------------

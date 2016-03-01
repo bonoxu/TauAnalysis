@@ -12,25 +12,38 @@ public:
     {
         N_EVENT,
         THRUST_PRINCIPLE,
+        
         EVENT_TYPE,
         PHOTON_EARLY_CONVERSION,
         PHOTON_FSR,
-        N_PHOTON,
-        N_PIONCHARGE,
-        N_MU,
-        N_E,
-        N_PFO,
-        N_CHARGE,
+        MC_CLOSE_Z,
+        
         E_EHCAL_RATIO,
-        R0,
+
+        N_PFO,
         M_VIS,
         E_VIS,
-        MC_CLOSE_Z,
+
+        N_CHARGE,
+
+        N_NEUTRAL,
+        M_NEUTRAL,
+        E_NEUTRAL,
+
+        N_MU,
+        E_MU,
+
+        N_E,
+        E_E,
+
+        N_PHOTON,
         M_PHOTON,
         E_PHOTON,
-        M_NEUTRAL,
-        N_NEUTRAL,
-        E_NEUTRAL,
+
+        N_PIONCHARGE,
+        M_PIONCHARGE,
+        E_PIONCHARGE,
+
         LOGCHI_RHOFIT,
         M_PION_RHOFIT,
         M_RHO_RHOFIT,
@@ -51,38 +64,53 @@ public:
                 return "photonEC";
             case PHOTON_FSR:
                 return "photonFSR";
-            case N_PHOTON:
-                return "nPhoton";
-            case N_PIONCHARGE:
-                return "nPionCharge";
-            case N_MU:
-                return "nMuon";
-            case N_E:
-                return "nElectron";
-            case N_PFO:
-                return "nPfo";
-            case N_CHARGE:
-                return "nCharge";
+            case MC_CLOSE_Z:
+                return "mcCloseToZ";
+
             case E_EHCAL_RATIO:
                 return "EEHCalRatio";
-            case R0:
-                return "R0";
+
+            case N_PFO:
+                return "nPfo";
             case M_VIS:
                 return "mVis";
             case E_VIS:
                 return "eVis";
-            case MC_CLOSE_Z:
-                return "mcCloseToZ";
+                
+            case N_CHARGE:
+                return "nCharge";
+
+            case N_NEUTRAL:
+                return "nNeutral";
+            case M_NEUTRAL:
+                return "mNeutral";
+            case E_NEUTRAL:
+                return "eNeutral";
+                
+            case N_MU:
+                return "nMuon";
+            case E_MU:
+                return "eMuon";
+
+            case N_E:
+                return "nElectron";
+            case E_E:
+                return "eElectron";
+                
+            case N_PHOTON:
+                return "nPhoton";
             case M_PHOTON:
                 return "mPhoton";
             case E_PHOTON:
                 return "ePhoton";
-            case M_NEUTRAL:
-                return "mNeutral";
-            case N_NEUTRAL:
-                return "nNeutral";
-            case E_NEUTRAL:
-                return "eNeutral";
+                
+            case N_PIONCHARGE:
+                return "nPionCharge";
+            case M_PIONCHARGE:
+                return "mPionCharge";
+            case E_PIONCHARGE:
+                return "ePionCharge";
+
             case LOGCHI_RHOFIT:
                 return "logChi2RhoFit";
             case M_PION_RHOFIT:
