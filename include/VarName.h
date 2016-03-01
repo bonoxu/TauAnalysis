@@ -30,7 +30,11 @@ public:
         E_PHOTON,
         M_NEUTRAL,
         N_NEUTRAL,
-        E_NEUTRAL
+        E_NEUTRAL,
+        LOGCHI_RHOFIT,
+        M_PION_RHOFIT,
+        M_RHO_RHOFIT,
+        COSSTAR_RHOFIT
     };
     
     static std::string GetName(VARIABLE var)
@@ -79,6 +83,14 @@ public:
                 return "nNeutral";
             case E_NEUTRAL:
                 return "eNeutral";
+            case LOGCHI_RHOFIT:
+                return "logChi2RhoFit";
+            case M_PION_RHOFIT:
+                return "mPionRhoFit";
+            case M_RHO_RHOFIT:
+                return "mRhoRhoFit";
+            case COSSTAR_RHOFIT:
+                return "cosStarRhoFit";
             default:
                 return "unknown";
                 break;

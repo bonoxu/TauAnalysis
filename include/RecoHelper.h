@@ -11,28 +11,6 @@ using namespace lcio;
 class RecoHelper
 {
 
-    class CalculateAverage
-    {
-    private:
-       std::size_t num;
-       double sum;
-    public:
-
-       CalculateAverage() : num (0) , sum (0)
-       {
-       }
-
-       void operator () (double elem) 
-       {
-          num++; 
-          sum += elem;
-       }
-
-       operator double() const
-       {
-           return sum / num;
-       }
-    };
 public:
 
     /**
@@ -115,6 +93,26 @@ public:
      */
     static TLorentzVector GetMomFromRecoParticleVec(const EVENT::ReconstructedParticleVec &pfoVec);
     
+    /**
+     *  @brief get cosine of angle in com centre of mass frame
+     * 
+     *  @param lhs lhs reco particle
+     *  @param rhs rhs reco particle
+     * 
+     *  @return cosine of angle in com centre of mass frame
+     */
+    static float GetCosineInCoMFrame(const ReconstructedParticle *lhs, const ReconstructedParticle *rhs);
+    
+    /**
+     *  @brief get cosine of angle in com centre of mass frame
+     * 
+     *  @param lhs lhs reco particle momentum
+     *  @param rhs rhs reco particle momentum
+     * 
+     *  @return cosine of angle in com centre of mass frame
+     */
+    static float GetCosineInCoMFrame(const TLorentzVector &lhs, const TLorentzVector &rhs);
+    
 private:
 
 };
@@ -194,6 +192,23 @@ inline TLorentzVector RecoHelper::GetMomFromRecoParticleVec(const EVENT::Reconst
         momentum += RecoHelper::GetMomFromRecoParticle(*iter);
     }
     return momentum;
+}
+
+//-----------------------------------------------------------------------------------------------------------------------------------------
+
+inline float RecoHelper::GetCosineInCoMFrame(const ReconstructedParticle *lhs, const ReconstructedParticle *rhs)
+{
+    return RecoHelper::GetCosineInCoMFrame(RecoHelper::GetMomFromRecoParticle(lhs), RecoHelper::GetMomFromRecoParticle(rhs));
+}
+
+//-----------------------------------------------------------------------------------------------------------------------------------------
+
+inline float RecoHelper::GetCosineInCoMFrame(const TLorentzVector &lhs, const TLorentzVector &rhs)
+{
+    const TLorentzVector dijet(lhs + rhs);
+    TLorentzVector decayParticleL(lhs);
+    decayParticleL.Boost(-dijet.BoostVector());
+    return (decayParticleL.Vect().Dot(dijet.Vect()) / (dijet.Vect().Mag() * decayParticleL.Vect().Mag()));
 }
 
 #endif
