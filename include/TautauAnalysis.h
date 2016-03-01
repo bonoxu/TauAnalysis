@@ -126,43 +126,7 @@ protected:
      *  @param hasPhotonEarlyConversion the pointer to mc pion
      */
     void AnalysePionNutralMC(const MCParticle* pMCPion, int &nPhoton, int &nOther, bool &hasPhotonEarlyConversion) const;
-    
-    /**
-     *  @brief Get preselected particles
-     * 
-     *  @param pfoVec pointer to pfo vector 
-     * 
-     *  @return preselected particles
-     */
-    EVENT::ReconstructedParticleVec GetPreselectedParticles(const EVENT::ReconstructedParticleVec &pfoVec) const;
-    
-    /**
-     *  @brief Get most energetic charged particle in the vector
-     * 
-     *  @param pfoVec pointer to pfo vector 
-     */
-    const ReconstructedParticle* GetMostEChargedParticle(const EVENT::ReconstructedParticleVec &pfoVec) const;
-    
-    /**
-     *  @brief True if particle polar angle is smaller than minZAngle
-     * 
-     *  @param momentum momentum
-     *  @param minZAngle minimum accepted Z angle
-     * 
-     *  @return True if particle polar angle is smaller than minZAngle
-     */
-    bool IsParticleInZAngle(const double *momentum, const float minZAngle) const;
-    
-    /**
-     *  @brief Comparator sort reconstructed particle by decsending order
-     * 
-     *  @param lhs lhs reco particle
-     *  @param lhs lhs reco particle
-     * 
-     *  @return True if lhs energy > rhs energy
-     */
-    static bool SortRecoParticleByEnergyDescendingOrder(const ReconstructedParticle * lhs, const ReconstructedParticle * rhs);
-    
+
     /**
      *  @brief Chi squared fit for rho 770
      * 

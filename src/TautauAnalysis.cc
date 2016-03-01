@@ -259,7 +259,7 @@ void TautauAnalysis::AnalyseHemisphereMC(const MCParticle* pMainMC, LCCollection
         for (EVENT::MCParticleVec::const_iterator iter = mcDaughterVec.begin(), iterEnd = mcDaughterVec.end(); iter != iterEnd; ++iter)
         {
             const MCParticle* pMCDaughter(*iter);
-            if (!particleCloseToZ && this->IsParticleInZAngle(pMCDaughter->getMomentum(), 0.2))
+            if (!particleCloseToZ && RecoHelper::IsParticleInZAngle(pMCDaughter->getMomentum(), 0.2))
                 particleCloseToZ = true;
 
             const int daughterPDG(std::fabs(pMCDaughter->getPDG()));
@@ -422,7 +422,7 @@ void TautauAnalysis::AnalyseHemisphereReco(const EVENT::ReconstructedParticleVec
         }
     }
 
-    std::sort(photonVec.begin(), photonVec.end(), SortRecoParticleByEnergyDescendingOrder);
+    std::sort(photonVec.begin(), photonVec.end(), RecoHelper::SortRecoParticleByEnergyDescendingOrder);
     TLorentzVector photonMom(0.f, 0.f, 0.f, 0.f);
     for (EVENT::ReconstructedParticleVec::const_iterator iter = photonVec.begin(), iterEnd = photonVec.end(); iter != iterEnd; ++iter)
     {
@@ -593,85 +593,6 @@ void TautauAnalysis::AnalysePionNutralMC(const MCParticle* pMCPion, int &nPhoton
 
 //-----------------------------------------------------------------------------------------------------------------------------------------
 
-EVENT::ReconstructedParticleVec TautauAnalysis::GetPreselectedParticles(const EVENT::ReconstructedParticleVec &pfoVec) const
-{
-    ReconstructedParticleVec preselectedPfoVec;
-    
-    const ReconstructedParticle* pMostEReco(this->GetMostEChargedParticle(pfoVec));
-    
-    if (!pMostEReco) 
-        return pfoVec;
-    
-    bool hasLepton(false);
-    
-    const float mostERecoMag2(pMostEReco->getMomentum()[0] * pMostEReco->getMomentum()[0] + pMostEReco->getMomentum()[1] * pMostEReco->getMomentum()[1] + 
-                pMostEReco->getMomentum()[2] * pMostEReco->getMomentum()[2]);
-    const float mostERecoMag(mostERecoMag2 < std::numeric_limits<float>::epsilon() ? std::numeric_limits<float>::epsilon() : std::sqrt(mostERecoMag2));
-    
-    for (EVENT::ReconstructedParticleVec::const_iterator iter = pfoVec.begin(), iterEnd = pfoVec.end(); iter != iterEnd; ++iter)
-    {
-        ReconstructedParticle *pReco(*iter);
-        if (E_MINUS == std::fabs(pReco->getType()) || MU_MINUS == std::fabs(pReco->getType()))
-        {
-            hasLepton = true;
-            break;
-        }
-        
-        const float dotProduct( pMostEReco->getMomentum()[0] * pReco->getMomentum()[0] + pMostEReco->getMomentum()[1] * pReco->getMomentum()[1] + 
-                pMostEReco->getMomentum()[2] * pReco->getMomentum()[2]);
-        const float momMag2(pReco->getMomentum()[0] * pReco->getMomentum()[0] + pReco->getMomentum()[1] * pReco->getMomentum()[1] + 
-                    pReco->getMomentum()[2] * pReco->getMomentum()[2]);
-        const float momMag(momMag2 < std::numeric_limits<float>::epsilon() ? std::numeric_limits<float>::epsilon() : std::sqrt(momMag2)); 
-        
-        const float cosAngle(dotProduct / momMag / mostERecoMag);
-        const bool bigAngleFlag(std::acos(std::fabs(cosAngle)) > 0.2 ? true : false);
-        //streamlog_out(DEBUG) << "bigAngleFlag :" << bigAngleFlag << " angle :" << std::acos(std::fabs(cosAngle)) << " type:" <<pReco->getType()<<std::endl;
-
-        if (bigAngleFlag) continue;
-        
-        preselectedPfoVec.push_back(pReco);
-    }
-    return (hasLepton) ? pfoVec : preselectedPfoVec;
-}
-
-//-----------------------------------------------------------------------------------------------------------------------------------------
-
-const ReconstructedParticle* TautauAnalysis::GetMostEChargedParticle(const EVENT::ReconstructedParticleVec &pfoVec) const
-{
-    const ReconstructedParticle* pMostEReco(NULL);
-    float mostE(std::numeric_limits<float>::epsilon());
-    for (EVENT::ReconstructedParticleVec::const_iterator iter = pfoVec.begin(), iterEnd = pfoVec.end(); iter != iterEnd; ++iter)
-    {
-        ReconstructedParticle *pReco(*iter);
-        if (0 == pReco->getCharge()) continue;
-        if (mostE < pReco->getEnergy())
-        {
-            mostE = pReco->getEnergy();
-            pMostEReco = pReco;
-        }
-    }
-    return pMostEReco;
-}
-
-//-----------------------------------------------------------------------------------------------------------------------------------------
-
-bool TautauAnalysis::IsParticleInZAngle(const double *momentum, const float minZAngle) const
-{
-    const float pt2(momentum[0] * momentum[0] + momentum[1] * momentum[1]);
-    const float pt(pt2 < std::numeric_limits<float>::epsilon() ? std::numeric_limits<float>::epsilon() : std::sqrt(pt2));
-    const float angle(std::atan(pt / std::fabs(momentum[2])));
-    //streamlog_out(DEBUG) << " ploar angle " << angle << std::endl;
-    return ((angle > minZAngle) ? false : true);
-}
-
-//-----------------------------------------------------------------------------------------------------------------------------------------
-
-bool TautauAnalysis::SortRecoParticleByEnergyDescendingOrder(const ReconstructedParticle * lhs, const ReconstructedParticle * rhs)
-{
-    return lhs->getEnergy() > rhs->getEnergy();
-}
-
-//-----------------------------------------------------------------------------------------------------------------------------------------
 float TautauAnalysis::Chi2FitRho770(const EVENT::ReconstructedParticleVec &inputPfoVec, EVENT::ReconstructedParticleVec &outputPfoVec) const
 {
     EVENT::ReconstructedParticleVec pionChargedVec, photonVec;

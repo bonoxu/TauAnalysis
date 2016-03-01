@@ -52,6 +52,26 @@ public:
      */
     static EVENT::ReconstructedParticleVec GetPfoVec(const EVENT::ReconstructedParticleVec &pfoVec, const int pdgCode, const bool signFlag);
 
+    /**
+     *  @brief True if particle polar angle is smaller than minZAngle
+     * 
+     *  @param momentum momentum
+     *  @param minZAngle minimum accepted Z angle
+     * 
+     *  @return True if particle polar angle is smaller than minZAngle
+     */
+    static bool IsParticleInZAngle(const double *momentum, const float minZAngle);
+    
+    /**
+     *  @brief Comparator sort reconstructed particle by decsending order
+     * 
+     *  @param lhs lhs reco particle
+     *  @param lhs lhs reco particle
+     * 
+     *  @return True if lhs energy > rhs energy
+     */
+    static bool SortRecoParticleByEnergyDescendingOrder(const ReconstructedParticle *lhs, const ReconstructedParticle *rhs);
+    
 private:
 
 };
@@ -94,6 +114,24 @@ inline EVENT::ReconstructedParticleVec RecoHelper::GetPfoVec(const EVENT::Recons
             outputPfoVec.push_back(*iter);
     }
     return outputPfoVec;
+}
+
+
+//-----------------------------------------------------------------------------------------------------------------------------------------
+
+inline bool RecoHelper::IsParticleInZAngle(const double *momentum, const float minZAngle)
+{
+    const float pt2(momentum[0] * momentum[0] + momentum[1] * momentum[1]);
+    const float pt(pt2 < std::numeric_limits<float>::epsilon() ? std::numeric_limits<float>::epsilon() : std::sqrt(pt2));
+    const float angle(std::atan(pt / std::fabs(momentum[2])));
+    return (angle < minZAngle);
+}
+
+//-----------------------------------------------------------------------------------------------------------------------------------------
+
+inline bool RecoHelper::SortRecoParticleByEnergyDescendingOrder(const ReconstructedParticle * lhs, const ReconstructedParticle * rhs)
+{
+    return lhs->getEnergy() > rhs->getEnergy();
 }
 
 #endif
