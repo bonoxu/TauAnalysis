@@ -384,26 +384,17 @@ void TautauAnalysis::AnalyseHemisphereReco(const EVENT::ReconstructedParticleVec
     m_pTTreeHelper->SetIntVar(VarName::GetName(VarName::N_PFO),  pfoVec.size());
     
     int nCharge(0), nNeutral(0);
-    double eECal(0.f), eHCal(0.f), eYoke(0.f), eLCal(0.f), eLHCal(0.f), eEHCalRatio(0.f), r0(0.f);
+    double eECal(0.f), eHCal(0.f), eYoke(0.f), eLCal(0.f), eLHCal(0.f), eEHCalRatio(0.f);
+    
     TLorentzVector visMom(0.f, 0.f, 0.f, 0.f), neutralMom(0.f, 0.f, 0.f, 0.f);
-    ReconstructedParticleVec photonVec;
     for (EVENT::ReconstructedParticleVec::const_iterator iter = pfoVec.begin(), iterEnd = pfoVec.end(); iter != iterEnd; ++iter)
     {
         const ReconstructedParticle * pReco(*iter);
-        visMom += TLorentzVector(pReco->getMomentum()[0], pReco->getMomentum()[1], pReco->getMomentum()[2], pReco->getEnergy());
-        if (PHOTON == pReco->getType())
-            photonVec.push_back(const_cast<ReconstructedParticle*>(pReco));
+        visMom += RecoHelper::GetMomFromRecoParticle(pReco);
         if (0 != std::fabs(pReco->getCharge()))
         {
             nCharge++;
-            if (!pReco->getTracks().empty())
-            {
-                const EVENT::Track *pTrack(pReco->getTracks()[0]);
-                const double d0(std::fabs(pTrack->getD0()));
-                const double z0(std::fabs(pTrack->getZ0()));
-                r0 = (std::sqrt(d0*d0 + z0*z0));
-            }
-            
+
             for ( EVENT::ClusterVec::const_iterator jIter = pReco->getClusters().begin(), jIterEnd = pReco->getClusters().end(); jIter != jIterEnd; ++jIter) 
             {
                 const Cluster *pCluster(*jIter);
@@ -418,22 +409,23 @@ void TautauAnalysis::AnalyseHemisphereReco(const EVENT::ReconstructedParticleVec
         else
         {
             nNeutral++;
-            neutralMom += TLorentzVector(pReco->getMomentum()[0], pReco->getMomentum()[1], pReco->getMomentum()[2], pReco->getEnergy());
+            neutralMom += RecoHelper::GetMomFromRecoParticle(pReco);
         }
     }
 
+    ReconstructedParticleVec photonVec(RecoHelper::GetPfoVec(pfoVec, PHOTON));
+    TLorentzVector photonMom(RecoHelper::GetMomFromRecoParticleVec(photonVec));
+    
+    // debug
     std::sort(photonVec.begin(), photonVec.end(), RecoHelper::SortRecoParticleByEnergyDescendingOrder);
-    TLorentzVector photonMom(0.f, 0.f, 0.f, 0.f);
     for (EVENT::ReconstructedParticleVec::const_iterator iter = photonVec.begin(), iterEnd = photonVec.end(); iter != iterEnd; ++iter)
     {
-        const ReconstructedParticle * pReco(*iter);
-        streamlog_out(DEBUG) << "photon E " << pReco->getEnergy() << std::endl;
-        photonMom += TLorentzVector(pReco->getMomentum()[0], pReco->getMomentum()[1], pReco->getMomentum()[2], pReco->getEnergy());
+        streamlog_out(DEBUG) << "photon E " << (*iter)->getEnergy() << std::endl;
     }
+    
     
     m_pTTreeHelper->SetIntVar(VarName::GetName(VarName::N_CHARGE),  nCharge);
     m_pTTreeHelper->SetDoubleVar(VarName::GetName(VarName::E_EHCAL_RATIO),  eEHCalRatio);
-    m_pTTreeHelper->SetDoubleVar(VarName::GetName(VarName::R0), r0);
     m_pTTreeHelper->SetDoubleVar(VarName::GetName(VarName::M_VIS), visMom.M());
     m_pTTreeHelper->SetDoubleVar(VarName::GetName(VarName::E_VIS), visMom.E());
     m_pTTreeHelper->SetDoubleVar(VarName::GetName(VarName::M_PHOTON), photonMom.M());
@@ -595,49 +587,49 @@ void TautauAnalysis::AnalysePionNutralMC(const MCParticle* pMCPion, int &nPhoton
 
 float TautauAnalysis::Chi2FitRho770(const EVENT::ReconstructedParticleVec &inputPfoVec, EVENT::ReconstructedParticleVec &outputPfoVec) const
 {
-    EVENT::ReconstructedParticleVec pionChargedVec, photonVec;
-    for (EVENT::ReconstructedParticleVec::const_iterator iter = inputPfoVec.begin(), iterEnd = inputPfoVec.end(); iter != iterEnd; ++iter)
-    {
-        ReconstructedParticle *pReco(*iter);
-        const int pdg(std::fabs(pReco->getType()));
-        if (PI_PLUS == pdg)
-        {
-            pionChargedVec.push_back(pReco);
-        }
-        else if (PHOTON == pdg)
-        {
-            photonVec.push_back(pReco);
-        }
-    }
+    EVENT::ReconstructedParticleVec pionChargedVec(RecoHelper::GetPfoVec(inputPfoVec, PI_PLUS));
+    EVENT::ReconstructedParticleVec photonVec(RecoHelper::GetPfoVec(inputPfoVec, PHOTON));
 
-    std::size_t n = 5;
-    std::size_t k = 3;
+    std::vector<int> pionChargeOrder;
+    for (int iter = 0; iter < pionChargedVec.size(); pionChargeOrder.push_back(iter++));
+    
+    std::vector<int> photonOrder;
+    for (int iter = 0; iter < photonVec.size(); photonOrder.push_back(iter++));
 
-    std::vector<int> ints;
-    for (int i = 0; i < n; ints.push_back(i++));
-
+    const int nPionChargeFit(1), nPhotonFit(2);
+    float bestChi2(std::numeric_limits<float>::max());
     do
     {
-       for (int i = 0; i < k; ++i)
-       {
-          std::cout << ints[i];
-       }
-       std::cout << "\n";
-    }
-    while(AlgorithmHelper::next_combination(ints.begin(),ints.begin() + k,ints.end()));
-    
-    
-
-    for (EVENT::ReconstructedParticleVec::const_iterator iter = pionChargedVec.begin(), iterEnd = pionChargedVec.end(); iter != iterEnd; ++iter)
-    {
-        ReconstructedParticle *pPionCharge(*iter);
-        for (EVENT::ReconstructedParticleVec::const_iterator jIter = photonVec.begin(), jIterEnd = photonVec.end(); jIter != jIterEnd; ++jIter)
+        EVENT::ReconstructedParticleVec pionChargedFitVec;
+        for (int iter = 0; iter < nPionChargeFit; ++iter)
         {
-            ReconstructedParticle *pPhotonLhs(*jIter);
-            for (EVENT::ReconstructedParticleVec::const_iterator jIter = photonVec.begin(), jIterEnd = photonVec.end(); jIter != jIterEnd; ++jIter)
+            pionChargedFitVec.push_back(pionChargedVec[pionChargeOrder[iter]]);
+        }
+        
+        do
+        {
+            EVENT::ReconstructedParticleVec photonFitVec;
+            for (int iter = 0; iter < nPhotonFit; ++iter)
             {
-                ReconstructedParticle *pPhotonLhs(*jIter);
+                photonFitVec.push_back(photonVec[photonOrder[iter]]);
+            }
+            
+            const TLorentzVector photonMom(RecoHelper::GetMomFromRecoParticleVec(photonFitVec));
+            const TLorentzVector totalMom(RecoHelper::GetMomFromRecoParticleVec(pionChargedFitVec) + photonMom);
+            
+            const float pionChi2((photonMom.M() - PdgTable::GetParticleMass(PI_ZERO)) * (photonMom.M() - PdgTable::GetParticleMass(PI_ZERO)));
+            const float rhoChi2((totalMom.M() - PdgTable::GetParticleMass(RHO_770_PLUS)) * (totalMom.M() - PdgTable::GetParticleMass(RHO_770_PLUS)));
+            const float chi2(pionChi2 + rhoChi2);
+            if (chi2 < bestChi2)
+            {
+                bestChi2 = chi2;
+                outputPfoVec.clear();
+                outputPfoVec.insert(outputPfoVec.begin(), photonFitVec.begin(), photonFitVec.end());
+                outputPfoVec.insert(outputPfoVec.begin(), pionChargedFitVec.begin(), pionChargedFitVec.end());
             }
         }
+        while(AlgorithmHelper::next_combination(photonOrder.begin(), photonOrder.begin() + nPhotonFit, photonOrder.end()));
     }
+    while(AlgorithmHelper::next_combination(pionChargeOrder.begin(), pionChargeOrder.begin() + nPionChargeFit, pionChargeOrder.end()));
+    return bestChi2;
 }

@@ -1,6 +1,8 @@
 #ifndef RecoHelper_h
 #define RecoHelper_h 1
 
+#include "TLorentzVector.h"
+
 #include "lcio.h"
 #include <EVENT/ReconstructedParticle.h>
 
@@ -9,7 +11,30 @@ using namespace lcio;
 class RecoHelper
 {
 
+    class CalculateAverage
+    {
+    private:
+       std::size_t num;
+       double sum;
+    public:
+
+       CalculateAverage() : num (0) , sum (0)
+       {
+       }
+
+       void operator () (double elem) 
+       {
+          num++; 
+          sum += elem;
+       }
+
+       operator double() const
+       {
+           return sum / num;
+       }
+    };
 public:
+
     /**
      *  @brief Get n pfo for a given pdg code, for absolute pdgCode
      * 
@@ -66,11 +91,29 @@ public:
      *  @brief Comparator sort reconstructed particle by decsending order
      * 
      *  @param lhs lhs reco particle
-     *  @param lhs lhs reco particle
+     *  @param rhs rhs reco particle
      * 
      *  @return True if lhs energy > rhs energy
      */
     static bool SortRecoParticleByEnergyDescendingOrder(const ReconstructedParticle *lhs, const ReconstructedParticle *rhs);
+    
+    /**
+     *  @brief Get Momentum from reco particle
+     * 
+     *  @param pReco reco particle
+     * 
+     *  @return momentum vector
+     */
+    static TLorentzVector GetMomFromRecoParticle(const ReconstructedParticle *pReco);
+    
+    /**
+     *  @brief Get Momentum from reco particle vec
+     * 
+     *  @param pfoVec reco particle vec
+     * 
+     *  @return momentum vector
+     */
+    static TLorentzVector GetMomFromRecoParticleVec(const EVENT::ReconstructedParticleVec &pfoVec);
     
 private:
 
@@ -134,7 +177,23 @@ inline bool RecoHelper::SortRecoParticleByEnergyDescendingOrder(const Reconstruc
     return lhs->getEnergy() > rhs->getEnergy();
 }
 
+//-----------------------------------------------------------------------------------------------------------------------------------------
+
+inline TLorentzVector RecoHelper::GetMomFromRecoParticle(const ReconstructedParticle *pReco)
+{
+    return TLorentzVector(pReco->getMomentum()[0], pReco->getMomentum()[1], pReco->getMomentum()[2], pReco->getEnergy());
+}
+
+//-----------------------------------------------------------------------------------------------------------------------------------------
+
+inline TLorentzVector RecoHelper::GetMomFromRecoParticleVec(const EVENT::ReconstructedParticleVec &pfoVec)
+{
+    TLorentzVector momentum(0.f, 0.f, 0.f, 0.f);
+    for (EVENT::ReconstructedParticleVec::const_iterator iter = pfoVec.begin(), iterEnd = pfoVec.end(); iter != iterEnd; ++iter)
+    {
+        momentum += RecoHelper::GetMomFromRecoParticle(*iter);
+    }
+    return momentum;
+}
+
 #endif
-
-
-
