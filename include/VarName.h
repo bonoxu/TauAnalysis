@@ -25,7 +25,9 @@ public:
         E_VIS,
 
         N_CHARGE,
-
+        M_CHARGE,
+        E_CHARGE,
+        
         N_NEUTRAL,
         M_NEUTRAL,
         E_NEUTRAL,
@@ -47,7 +49,14 @@ public:
         LOGCHI_RHOFIT,
         M_PION_RHOFIT,
         M_RHO_RHOFIT,
-        COSSTAR_RHOFIT
+        COSSTAR_RHOFIT,
+        
+        LOGCHI_A1FIT,
+        M_PION_LHS_A1FIT,
+        M_PION_RHS_A1FIT,
+        M_A1_A1FIT,
+        COSSTAR_LHS_A1FIT,
+        COSSTAR_RHS_A1FIT
     };
     
     static std::string GetName(VARIABLE var)
@@ -79,6 +88,10 @@ public:
                 
             case N_CHARGE:
                 return "nCharge";
+            case M_CHARGE:
+                return "mCharge";
+            case E_CHARGE:
+                return "eCharge";
 
             case N_NEUTRAL:
                 return "nNeutral";
@@ -119,6 +132,20 @@ public:
                 return "mRhoRhoFit";
             case COSSTAR_RHOFIT:
                 return "cosStarRhoFit";
+                
+            case LOGCHI_A1FIT:
+                return "logChi2A1Fit";
+            case M_PION_LHS_A1FIT:
+                return "mPionLhsA1Fit";
+            case M_PION_RHS_A1FIT:
+                return "mPionRhsA1Fit";
+            case M_A1_A1FIT:
+                return "mA1A1Fit";
+            case COSSTAR_LHS_A1FIT:
+                return "cosStarLhsA1Fit";
+            case COSSTAR_RHS_A1FIT:
+                return "cosStarRhsA1Fit";
+        
             default:
                 return "unknown";
                 break;

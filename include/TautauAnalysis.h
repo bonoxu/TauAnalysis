@@ -133,9 +133,23 @@ protected:
      *  @param inputPfoVec input particles
      *  @param pionChargePfoVec output charged pions to receive
      *  @param photonPfoVec output pion to receive 
+     * 
      *  @return Chi squared
      */
     float Chi2FitRho770(const EVENT::ReconstructedParticleVec &inputPfoVec, EVENT::ReconstructedParticleVec &pionChargePfoVec, EVENT::ReconstructedParticleVec &photonPfoVec) const;
+    
+    /**
+     *  @brief Chi squared fit for a1 1260
+     * 
+     *  @param inputPfoVec input particles
+     *  @param pionChargePfoVec output charged pions to receive
+     *  @param photonPfoVecLhs output pion to receive 
+     *  @param photonPfoVecRhs output pion to receive 
+     * 
+     *  @return Chi squared
+     */
+    float Chi2FitA11260(const EVENT::ReconstructedParticleVec &inputPfoVec, EVENT::ReconstructedParticleVec &pionChargePfoVec, EVENT::ReconstructedParticleVec &photonPfoVecLhs,
+        EVENT::ReconstructedParticleVec &photonPfoVecRhs) const;
     
     int                     m_nRun;                             // The counter for number of runs
     int                     m_nEvent;                           // The counter for number of events
