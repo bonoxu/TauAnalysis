@@ -137,6 +137,15 @@ int main(int argc, char* argv[]) {
 
     TCutVec muonSelectionCuts, tmvaEventTypeCuts;
     TString tmvaRoot("/var/clus/usera/xu/ILCSOFT/TauAnalysisNew/TMVA/Multiclass/TauTauAnalysis_100GeV_TMVAMulticlass.root");
+    muonSelectionCuts.push_back("photonEC < 1 && mcCloseToZ < 1");
+    
+    tmvaEventTypeCuts.push_back("BDTG.eventType1 > -0.853971 && BDTG.eventType2 > 0.432495 && BDTG.eventType3 > -0.188251 && BDTG.eventType4 > -0.855356 && \
+        BDTG.eventType5 > -0.0555112 && BDTG.eventType6 > -0.394758 && BDTG.eventType7 > -0.923282");
+    (void) getNumbers(idChainMap, idWeightMap, muonSelectionCuts, tmvaEventTypeCuts, tmvaRoot);
+
+/*
+ * 
+    TString tmvaRoot("/var/clus/usera/xu/ILCSOFT/TauAnalysisNew/TMVA/Multiclass/TauTauAnalysis_100GeV_TMVAMulticlass.root");
     muonSelectionCuts.push_back("thrustPrinciple > 0.99 && photonEC < 1 && mcCloseToZ < 1 && nMuon == 1 ");
     
     tmvaEventTypeCuts.push_back("BDTG.eventType1 > 0.413704 && BDTG.eventType2 > -0.52286 && BDTG.eventType3 > -0.607978 && BDTG.eventType4 > -0.0828638 && \
@@ -144,7 +153,6 @@ int main(int argc, char* argv[]) {
 
     (void) getNumbers(idChainMap, idWeightMap, muonSelectionCuts, tmvaEventTypeCuts, tmvaRoot);
 
-/*
     TCutVec electronSelectionCuts;
     electronSelectionCuts.push_back("thrustPrinciple > 0.99 && photonEC < 1 && mcCloseToZ < 1 && !(nMuon == 1) && nElectron == 1 && EEHCalRatio  > 0.95");
     (void) getNumbers(idChainMap, idWeightMap, electronSelectionCuts, tmvaDummyCuts,tmvaDummyRoot);

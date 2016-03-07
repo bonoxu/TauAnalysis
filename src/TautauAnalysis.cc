@@ -235,10 +235,10 @@ void TautauAnalysis::GetPfosInHemisphere(LCCollection* pPfoCollection, EVENT::Re
 
 void TautauAnalysis::AnalyseHemisphere(const ReconstructedParticleVec &pfoVec, LCCollection* pPfoCollection, const MCParticle* pMainMC, LCCollection* pMCPfoCollection)
 {
-    m_pTTreeHelper->SetIntVar(VarName::GetName(VarName::N_EVENT), m_nEvent);
+    m_pTTreeHelper->SetVar(VarName::GetName(VarName::N_EVENT), m_nEvent);
     
     const double thrustPrinciple(pPfoCollection->parameters().getFloatVal("principleThrustValue"));
-    m_pTTreeHelper->SetDoubleVar(VarName::GetName(VarName::THRUST_PRINCIPLE), thrustPrinciple);
+    m_pTTreeHelper->SetVar(VarName::GetName(VarName::THRUST_PRINCIPLE), thrustPrinciple);
     
     streamlog_out(DEBUG) << " analyse MC " << std::endl;
     this->AnalyseHemisphereMC(pMainMC, pMCPfoCollection);
@@ -368,10 +368,10 @@ void TautauAnalysis::AnalyseHemisphereMC(const MCParticle* pMainMC, LCCollection
     // DEBUG
     streamlog_out(DEBUG) << "Tau dacay final state " << tauDecayFinalState << std::endl;
     
-    m_pTTreeHelper->SetIntVar(VarName::GetName(VarName::EVENT_TYPE), tauDecayFinalState);
-    m_pTTreeHelper->SetIntVar(VarName::GetName(VarName::PHOTON_EARLY_CONVERSION), photonEarlyConversion);
-    m_pTTreeHelper->SetIntVar(VarName::GetName(VarName::MC_CLOSE_Z), particleCloseToZ);
-    m_pTTreeHelper->SetIntVar(VarName::GetName(VarName::PHOTON_FSR), nFSRPhoton);
+    m_pTTreeHelper->SetVar(VarName::GetName(VarName::EVENT_TYPE), tauDecayFinalState);
+    m_pTTreeHelper->SetVar(VarName::GetName(VarName::PHOTON_EARLY_CONVERSION), photonEarlyConversion);
+    m_pTTreeHelper->SetVar(VarName::GetName(VarName::MC_CLOSE_Z), particleCloseToZ);
+    m_pTTreeHelper->SetVar(VarName::GetName(VarName::PHOTON_FSR), nFSRPhoton);
     streamlog_out(DEBUG) << "particleCloseToZ " << particleCloseToZ << std::endl;
 }
 
@@ -456,45 +456,45 @@ void TautauAnalysis::AnalyseHemisphereReco(const EVENT::ReconstructedParticleVec
         a1FitCosStarRhs = RecoHelper::GetCosineInCoMFrame(RecoHelper::GetMomFromRecoParticle(a1FitPhotonVecRhs[0]), RecoHelper::GetMomFromRecoParticle(a1FitPhotonVecRhs[1]));
     }
 
-    m_pTTreeHelper->SetDoubleVar(VarName::GetName(VarName::E_EHCAL_RATIO),  eEHCalRatio);
+    m_pTTreeHelper->SetVar(VarName::GetName(VarName::E_EHCAL_RATIO),  eEHCalRatio);
 
-    m_pTTreeHelper->SetDoubleVar(VarName::GetName(VarName::M_VIS), visMom.M());
-    m_pTTreeHelper->SetDoubleVar(VarName::GetName(VarName::E_VIS), visMom.E());
-    m_pTTreeHelper->SetIntVar(VarName::GetName(VarName::N_PFO),  pfoVec.size());
+    m_pTTreeHelper->SetVar(VarName::GetName(VarName::M_VIS), visMom.M());
+    m_pTTreeHelper->SetVar(VarName::GetName(VarName::E_VIS), visMom.E());
+    m_pTTreeHelper->SetVar(VarName::GetName(VarName::N_PFO),  pfoVec.size());
     
-    m_pTTreeHelper->SetIntVar(VarName::GetName(VarName::N_NEUTRAL),  neutralVec.size());
-    m_pTTreeHelper->SetDoubleVar(VarName::GetName(VarName::M_NEUTRAL), neutralMom.M());
-    m_pTTreeHelper->SetDoubleVar(VarName::GetName(VarName::E_NEUTRAL), neutralMom.E());
+    m_pTTreeHelper->SetVar(VarName::GetName(VarName::N_NEUTRAL),  neutralVec.size());
+    m_pTTreeHelper->SetVar(VarName::GetName(VarName::M_NEUTRAL), neutralMom.M());
+    m_pTTreeHelper->SetVar(VarName::GetName(VarName::E_NEUTRAL), neutralMom.E());
     
-    m_pTTreeHelper->SetIntVar(VarName::GetName(VarName::N_CHARGE),  chargeVec.size());
-    m_pTTreeHelper->SetDoubleVar(VarName::GetName(VarName::M_CHARGE),  chargeMom.M());
-    m_pTTreeHelper->SetDoubleVar(VarName::GetName(VarName::E_CHARGE),  chargeMom.E());
+    m_pTTreeHelper->SetVar(VarName::GetName(VarName::N_CHARGE),  chargeVec.size());
+    m_pTTreeHelper->SetVar(VarName::GetName(VarName::M_CHARGE),  chargeMom.M());
+    m_pTTreeHelper->SetVar(VarName::GetName(VarName::E_CHARGE),  chargeMom.E());
     
-    m_pTTreeHelper->SetIntVar(VarName::GetName(VarName::N_MU),  muonVec.size());
-    m_pTTreeHelper->SetDoubleVar(VarName::GetName(VarName::E_MU),  muonMom.E());
+    m_pTTreeHelper->SetVar(VarName::GetName(VarName::N_MU),  muonVec.size());
+    m_pTTreeHelper->SetVar(VarName::GetName(VarName::E_MU),  muonMom.E());
     
-    m_pTTreeHelper->SetIntVar(VarName::GetName(VarName::N_E),  electronVec.size());
-    m_pTTreeHelper->SetDoubleVar(VarName::GetName(VarName::E_E),  electronMom.E());
+    m_pTTreeHelper->SetVar(VarName::GetName(VarName::N_E),  electronVec.size());
+    m_pTTreeHelper->SetVar(VarName::GetName(VarName::E_E),  electronMom.E());
     
-    m_pTTreeHelper->SetIntVar(VarName::GetName(VarName::N_PHOTON), nPhoton);
-    m_pTTreeHelper->SetDoubleVar(VarName::GetName(VarName::M_PHOTON), photonMom.M());
-    m_pTTreeHelper->SetDoubleVar(VarName::GetName(VarName::E_PHOTON), photonMom.E());
+    m_pTTreeHelper->SetVar(VarName::GetName(VarName::N_PHOTON), nPhoton);
+    m_pTTreeHelper->SetVar(VarName::GetName(VarName::M_PHOTON), photonMom.M());
+    m_pTTreeHelper->SetVar(VarName::GetName(VarName::E_PHOTON), photonMom.E());
 
-    m_pTTreeHelper->SetIntVar(VarName::GetName(VarName::N_PIONCHARGE), nPionCharge);
-    m_pTTreeHelper->SetDoubleVar(VarName::GetName(VarName::M_PIONCHARGE), pionChargeMom.M());
-    m_pTTreeHelper->SetDoubleVar(VarName::GetName(VarName::E_PIONCHARGE), pionChargeMom.E());
+    m_pTTreeHelper->SetVar(VarName::GetName(VarName::N_PIONCHARGE), nPionCharge);
+    m_pTTreeHelper->SetVar(VarName::GetName(VarName::M_PIONCHARGE), pionChargeMom.M());
+    m_pTTreeHelper->SetVar(VarName::GetName(VarName::E_PIONCHARGE), pionChargeMom.E());
 
-    m_pTTreeHelper->SetDoubleVar(VarName::GetName(VarName::LOGCHI_RHOFIT), rhoChi2NegLog);
-    m_pTTreeHelper->SetDoubleVar(VarName::GetName(VarName::M_PION_RHOFIT), rhoFitPionZeroM);
-    m_pTTreeHelper->SetDoubleVar(VarName::GetName(VarName::M_RHO_RHOFIT), rhoFitRhoM);
-    m_pTTreeHelper->SetDoubleVar(VarName::GetName(VarName::COSSTAR_RHOFIT), rhoFitCosStarPhoton);
+    m_pTTreeHelper->SetVar(VarName::GetName(VarName::LOGCHI_RHOFIT), rhoChi2NegLog);
+    m_pTTreeHelper->SetVar(VarName::GetName(VarName::M_PION_RHOFIT), rhoFitPionZeroM);
+    m_pTTreeHelper->SetVar(VarName::GetName(VarName::M_RHO_RHOFIT), rhoFitRhoM);
+    m_pTTreeHelper->SetVar(VarName::GetName(VarName::COSSTAR_RHOFIT), rhoFitCosStarPhoton);
     
-    m_pTTreeHelper->SetDoubleVar(VarName::GetName(VarName::LOGCHI_A1FIT), a1Chi2NegLog);
-    m_pTTreeHelper->SetDoubleVar(VarName::GetName(VarName::M_PION_LHS_A1FIT), a1FitPionZeroLhsM);
-    m_pTTreeHelper->SetDoubleVar(VarName::GetName(VarName::M_PION_RHS_A1FIT), a1FitPionZeroRhsM);
-    m_pTTreeHelper->SetDoubleVar(VarName::GetName(VarName::M_A1_A1FIT), a1FitA1M);
-    m_pTTreeHelper->SetDoubleVar(VarName::GetName(VarName::COSSTAR_LHS_A1FIT), a1FitCosStarLhs);
-    m_pTTreeHelper->SetDoubleVar(VarName::GetName(VarName::COSSTAR_RHS_A1FIT), a1FitCosStarRhs);
+    m_pTTreeHelper->SetVar(VarName::GetName(VarName::LOGCHI_A1FIT), a1Chi2NegLog);
+    m_pTTreeHelper->SetVar(VarName::GetName(VarName::M_PION_LHS_A1FIT), a1FitPionZeroLhsM);
+    m_pTTreeHelper->SetVar(VarName::GetName(VarName::M_PION_RHS_A1FIT), a1FitPionZeroRhsM);
+    m_pTTreeHelper->SetVar(VarName::GetName(VarName::M_A1_A1FIT), a1FitA1M);
+    m_pTTreeHelper->SetVar(VarName::GetName(VarName::COSSTAR_LHS_A1FIT), a1FitCosStarLhs);
+    m_pTTreeHelper->SetVar(VarName::GetName(VarName::COSSTAR_RHS_A1FIT), a1FitCosStarRhs);
 
 }
 

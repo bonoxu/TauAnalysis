@@ -12,6 +12,10 @@ class TTreeHelper
 {
 
 public:
+
+    typedef std::map<std::string, int> StrIntMap;
+    typedef std::set<std::string> StrSet;
+    typedef std::map<std::string, double> StrDoubleMap;
     
     /**
      *  @brief constructor with a tfile and a ttree
@@ -42,9 +46,6 @@ public:
      *  @brief clear double and integer variables
      */
     void Clear();
-    
-    typedef std::map<std::string, int> StrIntMap;
-    typedef std::set<std::string> StrSet;
     
     /**
      *  @brief initialise an integer variable
@@ -77,8 +78,6 @@ public:
      */
     int GetIntVar(const std::string &varName) const;
     
-    typedef std::map<std::string, double> StrDoubleMap;
-    
     /**
      *  @brief initialise an double variable
      * 
@@ -110,12 +109,75 @@ public:
      */
     double GetDoubleVar(const std::string &varName) const;
     
+    /**
+     *  @brief  set varible
+     *
+     *  @para	number number
+     */
+    template <typename NumberType> 
+    void SetVar(const std::string &varName, const NumberType number);
+    
+    /**
+     *  @brief  get varible
+     *
+     *  @param varNames variable name
+     *  @para	varName variable name
+     */
+    template <typename NumberType> 
+    NumberType GetVar(const std::string &varName) const;
+    
 protected:
+
+    /**
+     *  @brief  check if the variable is an interger
+     *
+     *  @para	number number
+     * 
+     *  @return true if the variable is an interger
+     */
+    template <typename NumberType> 
+    bool IsInt(const NumberType number);
+
+    /**
+     *  @brief  check if the variable is a float or double
+     *
+     *  @para	number number
+     * 
+     *  @return true if the variable is a float or double
+     */
+    template <typename NumberType> 
+    bool IsFloat(const NumberType number);
+    
     TTree           *m_pTTree;          // TTree
     TFile           *m_pTFile;          // TFile
     StrIntMap       m_strIntMap;        // string to integer map
     StrDoubleMap    m_strDoubleMap;     // string to double map
 };
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+template <typename NumberType> 
+inline bool TTreeHelper::IsInt(const NumberType number)
+{
+    return (typeid(int) == typeid(number));
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+template <typename NumberType> 
+inline bool TTreeHelper::IsFloat(const NumberType number)
+{
+    return (typeid(float) == typeid(number) || typeid(double) == typeid(number));
+}
+
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+template <typename NumberType> 
+inline void TTreeHelper::SetVar(const std::string &varName, const NumberType number)
+{
+    // ATTN treat all non float/double as int
+    return (this->IsFloat(number) ? this->SetDoubleVar(varName, number) : this->SetIntVar(varName, number));
+}
 
 #endif
 

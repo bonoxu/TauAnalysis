@@ -49,8 +49,8 @@
       </parameter>
       <parameter name="GearXMLFile" value="/usera/xu/ILCSOFT/myGridDownload/ILD_o1_v06_SiW_5x5.gear"/>
       <!--../test/gear.xml /r02/lc/xu/udsJet/list/ILD_o1_v05_SiW_5x5.gear /var/clus/usera/xu/ILCSOFT/TauAnalysis/steer/ILD_o1_v06_SiW_5x5.gear /usera/xu/ILCSOFT/myGridDownload/ILD_o1_v06_SiW_5x5.gear /r02/lc/xu/eMinus/20150928/gear/ILD_o1_v05_SiW_5x5.gear-->
-      <parameter name="MaxRecordNumber" value="-1"/>
-      <parameter name="SkipNEvents" value="113"/>
+      <parameter name="MaxRecordNumber" value="3"/>
+      <parameter name="SkipNEvents" value="1"/>
       <parameter name="SupressCheck" value="false"/>
       <parameter name="Verbosity" options="DEBUG0-4,MESSAGE0-4,WARNING0-4,ERROR0-4,SILENT"> MESSAGE </parameter>
       <parameter name="RandomSeed" value="1234567890" />

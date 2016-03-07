@@ -4,7 +4,8 @@
 #include <map>
 #include <set>
 #include <limits>
-
+#include <typeinfo> 
+ 
 #include "lcio.h"
 #include "EVENT/MCParticle.h"
 #include <EVENT/ReconstructedParticle.h>
@@ -80,9 +81,7 @@ public:
      * 
      */
     static const MCParticle* GetMCParticle(const ReconstructedParticleVec &recoVec, const LCRelationNavigator* pRecoMCNavigator, const MCMCMap &daughterMcToMCMap);
-    
 private:
-
 };
 
 //------------------------------------------------------------------------------------------------------------------------------------------
