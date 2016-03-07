@@ -467,22 +467,22 @@ void TautauAnalysis::AnalyseHemisphereReco(const EVENT::ReconstructedParticleVec
     m_pTTreeHelper->SetDoubleVar(VarName::GetName(VarName::E_NEUTRAL), neutralMom.E());
     
     m_pTTreeHelper->SetIntVar(VarName::GetName(VarName::N_CHARGE),  chargeVec.size());
-    m_pTTreeHelper->SetIntVar(VarName::GetName(VarName::M_CHARGE),  chargeMom.M());
-    m_pTTreeHelper->SetIntVar(VarName::GetName(VarName::E_CHARGE),  chargeMom.E());
+    m_pTTreeHelper->SetDoubleVar(VarName::GetName(VarName::M_CHARGE),  chargeMom.M());
+    m_pTTreeHelper->SetDoubleVar(VarName::GetName(VarName::E_CHARGE),  chargeMom.E());
     
     m_pTTreeHelper->SetIntVar(VarName::GetName(VarName::N_MU),  muonVec.size());
-    m_pTTreeHelper->SetIntVar(VarName::GetName(VarName::E_MU),  muonMom.E());
+    m_pTTreeHelper->SetDoubleVar(VarName::GetName(VarName::E_MU),  muonMom.E());
     
     m_pTTreeHelper->SetIntVar(VarName::GetName(VarName::N_E),  electronVec.size());
-    m_pTTreeHelper->SetIntVar(VarName::GetName(VarName::E_E),  electronMom.E());
+    m_pTTreeHelper->SetDoubleVar(VarName::GetName(VarName::E_E),  electronMom.E());
     
     m_pTTreeHelper->SetIntVar(VarName::GetName(VarName::N_PHOTON), nPhoton);
     m_pTTreeHelper->SetDoubleVar(VarName::GetName(VarName::M_PHOTON), photonMom.M());
     m_pTTreeHelper->SetDoubleVar(VarName::GetName(VarName::E_PHOTON), photonMom.E());
 
     m_pTTreeHelper->SetIntVar(VarName::GetName(VarName::N_PIONCHARGE), nPionCharge);
-    m_pTTreeHelper->SetIntVar(VarName::GetName(VarName::M_PIONCHARGE), pionChargeMom.M());
-    m_pTTreeHelper->SetIntVar(VarName::GetName(VarName::E_PIONCHARGE), pionChargeMom.E());
+    m_pTTreeHelper->SetDoubleVar(VarName::GetName(VarName::M_PIONCHARGE), pionChargeMom.M());
+    m_pTTreeHelper->SetDoubleVar(VarName::GetName(VarName::E_PIONCHARGE), pionChargeMom.E());
 
     m_pTTreeHelper->SetDoubleVar(VarName::GetName(VarName::LOGCHI_RHOFIT), rhoChi2NegLog);
     m_pTTreeHelper->SetDoubleVar(VarName::GetName(VarName::M_PION_RHOFIT), rhoFitPionZeroM);

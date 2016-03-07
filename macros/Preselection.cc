@@ -11,20 +11,10 @@
 
 #include <TCut.h>
 
-enum EVENT_TYPE
-{
-    E = 1,
-    MU = 2,
-    PION = 3,
-    PION2PHOTON = 4,
-    PION4PHOTON = 5,
-    PION2PION = 6,
-    OTHER = 0
-};
 typedef std::vector<TString> TStringVec;
 typedef std::vector<double> DoubleVec;
 typedef std::map<TString, DoubleVec> TStringDoubleVecMap;
-typedef std::map<EVENT_TYPE, TString> EvtTypeNameMap;
+
 typedef std::map<TString, TChain *> StrTChainMap;
 typedef std::vector<TCut> TCutVec;
 typedef std::map<TString, double> TStringDoubleMap;
@@ -60,6 +50,8 @@ TString getName(const int id)
             return "Pion4Y";
         case 6:
             return "3Pion";
+        case 7:
+            return "3Pion2Y";
         default:
             return "unknown";
     }
@@ -70,15 +62,20 @@ TString getName(const int id)
 void getNumbers(StrTChainMap &idChainMap, TStringDoubleMap &idWeightMap, const TCutVec &selectionCuts, const TCutVec &tmvaSelectionCuts,
     const TString &tmvaRootFile)
 {
-    TCut currentSelectionCut;
-    
+    const int nEventType(7);
     const int columnWidth(14);
+    
+    TChain *pTChain= new TChain("TestTree");
+    pTChain->Add(tmvaRootFile);
+    
     std::cout << std::setprecision(2) << std::fixed;
-    for (int i = 0, iEnd = 7; i < iEnd; ++i)
+    for (int i = 1, iEnd = 1 + nEventType; i < iEnd; ++i)
     {
         std::cout<< std::setw(columnWidth)<<getName(i)<<";";
     }
     std::cout<<std::endl;
+    
+    TCut currentSelectionCut;
     for (StrTChainMap::const_iterator jIter = idChainMap.begin(), jIterEnd = idChainMap.end(); jIter != jIterEnd; ++jIter)
     {
         std::cout<<jIter->first<<std::endl;
@@ -89,15 +86,33 @@ void getNumbers(StrTChainMap &idChainMap, TStringDoubleMap &idWeightMap, const T
         {
             currentSelectionCut+=*iter;
             const double nTotal(jIter->second->GetEntries(currentSelectionCut) * weight);
-            for (int i = 0, iEnd = 7; i < iEnd; ++i)
+            for (int i = 1, iEnd = 1 + nEventType; i < iEnd; ++i)
             {
-                const TCut eventType(TString::Format("TMath::Abs(eventType - %d ) < 0.2" , i));
+                const TCut eventType(TString::Format("eventType == %d", i));
                 const double signal(jIter->second->GetEntries(eventType + currentSelectionCut) * weight);
                 std::cout<<std::setw(columnWidth)<<TString::Format("%4.2f,%4.3f", signal , signal / nTotal)<<";";
             }
             std::cout<<*iter<<std::endl;
         }
+        // do TMVA
+        
+        currentSelectionCut = "";
+        for (TCutVec::const_iterator iter = tmvaSelectionCuts.begin(), iterEnd = tmvaSelectionCuts.end(); iter != iterEnd; ++iter)
+        {
+            currentSelectionCut+=*iter;
+            const double nTotal(pTChain->GetEntries(currentSelectionCut) * 2 * weight);
+            for (int i = 1, iEnd = 1 + nEventType; i < iEnd; ++i)
+            {
+                const TCut eventType(TString::Format("eventType == %d", i));
+                const double signal(pTChain->GetEntries(eventType + currentSelectionCut) * 2 * weight);
+                std::cout<<std::setw(columnWidth)<<TString::Format("%4.2f,%4.3f", signal , signal / nTotal)<<";";
+            }
+            std::cout<<*iter<<std::endl;
+        }
     }
+
+ 
+
 
 }
 
@@ -114,17 +129,22 @@ int main(int argc, char* argv[]) {
     //initialiseMaps("cheat","/r02/lc/xu/tau/PandoraBono/20160212am19cheat/rootCustom/tauAnalysisTemplate_*.root", defaultTreeName, 0, idChainMap, idWeightMap);
     //initialiseMaps("default","/r02/lc/xu/tau/PandoraDefault/20160213am21/rootCustom/tauAnalysisTemplate_*.root", defaultTreeName, 428.2776, idChainMap, idWeightMap);
     //initialiseMaps("split","/r02/lc/xu/tau/PandoraBonoSplit/20160216am19/rootCustom/tauAnalysisTemplate_*.root", defaultTreeName, 500, idChainMap, idWeightMap);
-    //initialiseMaps("100improved","/r02/lc/xu/tau/PandoraBonoNew/100GeV/rootCustom/tauAnalysisTemplate_*.root", defaultTreeName, 52869, idChainMap, idWeightMap);
+    initialiseMaps("100improved","/r06/lc/xu/TautauAnalysis/PandoraDefault/100GeV/rootCustom/tauAnalysisTemplate_10.root", defaultTreeName, 52869, idChainMap, idWeightMap);
     //initialiseMaps("100default","/r02/lc/xu/tau/PandoraDefaultNew/100GeV/rootCustom/tauAnalysisTemplate_*.root", defaultTreeName, 52869, idChainMap, idWeightMap);
-    initialiseMaps("200improved","/r02/lc/xu/tau/PandoraBonoNew/200GeV/rootCustom/tauAnalysisTemplate_*.root", defaultTreeName, 2844.395, idChainMap, idWeightMap);
-    initialiseMaps("200default","/r02/lc/xu/tau/PandoraDefaultNew/200GeV/rootCustom/tauAnalysisTemplate_*.root", defaultTreeName, 2844.395, idChainMap, idWeightMap);
+    //initialiseMaps("200improved","/r02/lc/xu/tau/PandoraBonoNew/200GeV/rootCustom/tauAnalysisTemplate_*.root", defaultTreeName, 2844.395, idChainMap, idWeightMap);
+    //initialiseMaps("200default","/r02/lc/xu/tau/PandoraDefaultNew/200GeV/rootCustom/tauAnalysisTemplate_*.root", defaultTreeName, 2844.395, idChainMap, idWeightMap);
 
-    
-    TCutVec muonSelectionCuts, tmvaDummyCuts;
-    TString tmvaDummyRoot("");
+
+    TCutVec muonSelectionCuts, tmvaEventTypeCuts;
+    TString tmvaRoot("/var/clus/usera/xu/ILCSOFT/TauAnalysisNew/TMVA/Multiclass/TauTauAnalysis_100GeV_TMVAMulticlass.root");
     muonSelectionCuts.push_back("thrustPrinciple > 0.99 && photonEC < 1 && mcCloseToZ < 1 && nMuon == 1 ");
-    (void) getNumbers(idChainMap, idWeightMap, muonSelectionCuts, tmvaDummyCuts,tmvaDummyRoot);
+    
+    tmvaEventTypeCuts.push_back("BDTG.eventType1 > 0.413704 && BDTG.eventType2 > -0.52286 && BDTG.eventType3 > -0.607978 && BDTG.eventType4 > -0.0828638 && \
+        BDTG.eventType5 > -0.61983 && BDTG.eventType6 > -0.826396 && BDTG.eventType7 > -0.698257");
 
+    (void) getNumbers(idChainMap, idWeightMap, muonSelectionCuts, tmvaEventTypeCuts, tmvaRoot);
+
+/*
     TCutVec electronSelectionCuts;
     electronSelectionCuts.push_back("thrustPrinciple > 0.99 && photonEC < 1 && mcCloseToZ < 1 && !(nMuon == 1) && nElectron == 1 && EEHCalRatio  > 0.95");
     (void) getNumbers(idChainMap, idWeightMap, electronSelectionCuts, tmvaDummyCuts,tmvaDummyRoot);
@@ -145,8 +165,8 @@ int main(int argc, char* argv[]) {
     TCutVec pion4YSelectionCuts;
     pion4YSelectionCuts.push_back("thrustPrinciple > 0.99 && photonEC < 1 && mcCloseToZ < 1 && !(nMuon == 1) && !(nElectron == 1 && EEHCalRatio  > 0.95) && nPionCharge == 1 && nPhoton > 1 && !(nPhoton == 2 && mPhoton < 0.3 && mPhoton > 0.05 ) && mPhoton >= 0.3 ");
     (void) getNumbers(idChainMap, idWeightMap, pion4YSelectionCuts, tmvaDummyCuts,tmvaDummyRoot);
-
-
+*/
+/*
     TCutVec selectionCuts;
     selectionCuts.push_back("");
     selectionCuts.push_back("thrustPrinciple > 0.99");
@@ -205,7 +225,7 @@ int main(int argc, char* argv[]) {
     std::cout<<"Stats for selected R=0.7 "<<tmvaRootR0_7<<std::endl;
     (void) getNumbers(idChainMap, idWeightMap, selectionCuts, tmvaSelectionCuts,tmvaRootR0_7);
     //pRootapp->Run();
-
+*/
     return 0;
 
 }
