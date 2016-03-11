@@ -399,7 +399,7 @@ void TautauAnalysis::AnalyseHemisphereReco(const EVENT::ReconstructedParticleVec
             neutralVec.push_back(pReco);
         }
     }
-    const double eEHCalRatio((eECal + eHCal > std::numeric_limits<double>::epsilon()) ? eECal / (eECal + eHCal) : std::numeric_limits<double>::max());
+    const double eEHCalRatio((eECal + eHCal > std::numeric_limits<double>::epsilon()) ? eECal / (eECal + eHCal) : 0.f);
 
     ReconstructedParticleVec photonVec(RecoHelper::GetPfoVec(pfoVec, PHOTON));
 
@@ -436,6 +436,10 @@ void TautauAnalysis::AnalyseHemisphereReco(const EVENT::ReconstructedParticleVec
         rhoFitRhoM = (RecoHelper::GetMomFromRecoParticleVec(rhoFitPhotonVec) + RecoHelper::GetMomFromRecoParticleVec(rhoFitPionChargeVec)).M();
         rhoFitCosStarPhoton = RecoHelper::GetCosineInCoMFrame(RecoHelper::GetMomFromRecoParticle(rhoFitPhotonVec[0]), RecoHelper::GetMomFromRecoParticle(rhoFitPhotonVec[1]));
     }
+    else
+    {
+        rhoChi2NegLog = -std::log(-rhoChi2NegLog);
+    }
 
     // a1 test
     float a1Chi2(std::numeric_limits<float>::max());
@@ -454,6 +458,10 @@ void TautauAnalysis::AnalyseHemisphereReco(const EVENT::ReconstructedParticleVec
             RecoHelper::GetMomFromRecoParticleVec(a1FitPionChargeVec)).M();
         a1FitCosStarLhs = RecoHelper::GetCosineInCoMFrame(RecoHelper::GetMomFromRecoParticle(a1FitPhotonVecLhs[0]), RecoHelper::GetMomFromRecoParticle(a1FitPhotonVecLhs[1]));
         a1FitCosStarRhs = RecoHelper::GetCosineInCoMFrame(RecoHelper::GetMomFromRecoParticle(a1FitPhotonVecRhs[0]), RecoHelper::GetMomFromRecoParticle(a1FitPhotonVecRhs[1]));
+    }
+    else
+    {
+        a1Chi2NegLog = - std::log(-a1Chi2NegLog);
     }
 
     m_pTTreeHelper->SetVar(VarName::GetName(VarName::E_EHCAL_RATIO),  eEHCalRatio);

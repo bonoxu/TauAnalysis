@@ -116,7 +116,7 @@ void BookMethod(TMVA::Factory *&pFactory, const StringIntMap &mvaMethodVec)
 
 int main(int argc, char** argv)
 {
-    Parameters parameters("TauTauAnalysis", "100GeV", "/r06/lc/xu/TautauAnalysis/PandoraDefault/100GeV/rootCustom/tauAnalysisTemplate_10.root", "sel", 52869);
+    Parameters parameters("TauTauAnalysisBono", "500GeV", "/r06/lc/xu/TautauAnalysis/PandoraBono/500GeV/rootCustom/tauAnalysisTemplate_mod1_*.root", "sel", 428.2776);
     // ATTN assume eventtype starts at 1 ends in 1 + nEvtType
     const int nEvtType(7);
     TMVA::Tools::Instance();
@@ -140,9 +140,9 @@ int main(int argc, char** argv)
     //pFactory->AddVariable( "mVis", "visible mass", "GeV", 'F' );
     //pFactory->AddVariable( "nCharge", "number of charged PFOs", "", 'I' );
     pFactory->AddVariable( "thrustPrinciple", "thrust", "", 'F' );
-    pFactory->AddVariable( "EEHCalRatioFixed:= EEHCalRatio > 1. ? 0. : EEHCalRatio", "E ECal to All ratio", "", 'F' );
+    pFactory->AddVariable( "EEHCalRatio", "E ECal to All ratio", "", 'F' );
     pFactory->AddVariable( "nPfo", "nPfo", "", 'I' );
-    pFactory->AddVariable( "mVis", "mVis", "", 'I' );
+    pFactory->AddVariable( "mVis", "mVis", "", 'F' );
     pFactory->AddVariable( "nCharge", "nCharge", "", 'I' );
     pFactory->AddVariable( "nNeutral", "nNeutral", "", 'I' );
     pFactory->AddVariable( "nMuon", "nMuon", "", 'I' );
@@ -155,11 +155,11 @@ int main(int argc, char** argv)
     pFactory->AddVariable( "nPionCharge", "nPionCharge", "", 'I' );
     pFactory->AddVariable( "mPionCharge", "mPionCharge", "GeV", 'F' );
     pFactory->AddVariable( "ePionCharge", "ePionCharge", "GeV", 'F' );
-    pFactory->AddVariable( "logChi2RhoFitFix:= logChi2RhoFit < -1000 ? -TMath::Log(-logChi2RhoFit) : logChi2RhoFit", "-logChi2 Rho Fit", "", 'F' );
+    pFactory->AddVariable( "logChi2RhoFit", "-logChi2 Rho Fit", "", 'F' );
     pFactory->AddVariable( "mPionRhoFit", "mPion Rho Fit", "GeV", 'F' );
     pFactory->AddVariable( "mRhoRhoFit", "mRho Fit", "GeV", 'F' );
     pFactory->AddVariable( "cosStarRhoFit", "cos* Rho Fit", "GeV", 'F' );
-    pFactory->AddVariable( "logChi2A1FitFix:= logChi2A1Fit < -1000 ? -TMath::Log(-logChi2A1Fit) : logChi2A1Fit", "-logChi2 A1 Fit", "", 'F' );
+    pFactory->AddVariable( "logChi2A1Fit", "-logChi2 A1 Fit", "", 'F' );
     pFactory->AddVariable( "mPionLhsA1Fit", "mPion lhs A1 Fit", "GeV", 'F' );
     pFactory->AddVariable( "mPionRhsA1Fit", "mPion Rhs A1 Fit", "GeV", 'F' );
     pFactory->AddVariable( "mA1A1Fit", "mA1 Fit", "GeV", 'F' );

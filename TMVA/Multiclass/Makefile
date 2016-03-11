@@ -10,7 +10,9 @@ LIBS    = -L$(TMVASYS)/lib -lTMVA.1 $(shell root-config --libs) -lMLP -lTreePlay
 
 BINS = TMVAMulticlass \
 	TMVAMulticlassApplication \
-	myTMVAMulticlass
+	myTMVAMulticlass \
+	myTMVAMulticlassDefault \
+    myTMVAMulticlassApplication \
 
 TMVALIB = $(TMVASYS)/lib/libTMVA.1.so
 

@@ -129,20 +129,61 @@ int main(int argc, char* argv[]) {
     //initialiseMaps("cheat","/r02/lc/xu/tau/PandoraBono/20160212am19cheat/rootCustom/tauAnalysisTemplate_*.root", defaultTreeName, 0, idChainMap, idWeightMap);
     //initialiseMaps("default","/r02/lc/xu/tau/PandoraDefault/20160213am21/rootCustom/tauAnalysisTemplate_*.root", defaultTreeName, 428.2776, idChainMap, idWeightMap);
     //initialiseMaps("split","/r02/lc/xu/tau/PandoraBonoSplit/20160216am19/rootCustom/tauAnalysisTemplate_*.root", defaultTreeName, 500, idChainMap, idWeightMap);
-    initialiseMaps("100improved","/r06/lc/xu/TautauAnalysis/PandoraDefault/100GeV/rootCustom/tauAnalysisTemplate_10.root", defaultTreeName, 52869, idChainMap, idWeightMap);
-    //initialiseMaps("100default","/r02/lc/xu/tau/PandoraDefaultNew/100GeV/rootCustom/tauAnalysisTemplate_*.root", defaultTreeName, 52869, idChainMap, idWeightMap);
+    initialiseMaps("100improved","/r06/lc/xu/TautauAnalysis/PandoraBono/100GeV/rootCustom/tauAnalysisTemplate_mod1_*.root", defaultTreeName, 52869, idChainMap, idWeightMap);
+    initialiseMaps("100default","/r06/lc/xu/TautauAnalysis/PandoraDefault/100GeV/rootCustom/tauAnalysisTemplate_mod1_*.root", defaultTreeName, 52869, idChainMap, idWeightMap);
     //initialiseMaps("200improved","/r02/lc/xu/tau/PandoraBonoNew/200GeV/rootCustom/tauAnalysisTemplate_*.root", defaultTreeName, 2844.395, idChainMap, idWeightMap);
     //initialiseMaps("200default","/r02/lc/xu/tau/PandoraDefaultNew/200GeV/rootCustom/tauAnalysisTemplate_*.root", defaultTreeName, 2844.395, idChainMap, idWeightMap);
+    // 1000GeV 106.4
 
 
-    TCutVec muonSelectionCuts, tmvaEventTypeCuts;
-    TString tmvaRoot("/var/clus/usera/xu/ILCSOFT/TauAnalysisNew/TMVA/Multiclass/TauTauAnalysis_100GeV_TMVAMulticlass.root");
-    muonSelectionCuts.push_back("photonEC < 1 && mcCloseToZ < 1");
+    TCutVec muonSelectionCuts, tmvaElectronCuts;
+    muonSelectionCuts.push_back("");
+    muonSelectionCuts.push_back("mcCloseToZ < 1"); 
+    muonSelectionCuts.push_back("photonEC < 1");
+    TCut preSelCut("");
+    TString tmvaRoot("/var/clus/usera/xu/ILCSOFT/TauAnalysisNew/TMVA/Multiclass/TauTauAnalysisBono_100GeV_TMVAMulticlass.root");
+    tmvaElectronCuts.push_back(preSelCut + "BDTG.eventType1 > BDTG.eventType3 && BDTG.eventType1 > BDTG.eventType2 && BDTG.eventType1 > BDTG.eventType4 && \
+        BDTG.eventType1 > BDTG.eventType5 && BDTG.eventType1 > BDTG.eventType6 && BDTG.eventType1 > BDTG.eventType7");
+    (void) getNumbers(idChainMap, idWeightMap, muonSelectionCuts, tmvaElectronCuts, tmvaRoot);
+
+    TCutVec dummySelectionCuts, tmvaMuonCuts;
+    tmvaMuonCuts.push_back(preSelCut + "BDTG.eventType2 > BDTG.eventType1 && BDTG.eventType2 > BDTG.eventType3 && BDTG.eventType2 > BDTG.eventType4 && \
+        BDTG.eventType2 > BDTG.eventType5 && BDTG.eventType2 > BDTG.eventType6 && BDTG.eventType2 > BDTG.eventType7");
+    (void) getNumbers(idChainMap, idWeightMap, dummySelectionCuts, tmvaMuonCuts, tmvaRoot);
     
-    tmvaEventTypeCuts.push_back("BDTG.eventType1 > -0.853971 && BDTG.eventType2 > 0.432495 && BDTG.eventType3 > -0.188251 && BDTG.eventType4 > -0.855356 && \
-        BDTG.eventType5 > -0.0555112 && BDTG.eventType6 > -0.394758 && BDTG.eventType7 > -0.923282");
-    (void) getNumbers(idChainMap, idWeightMap, muonSelectionCuts, tmvaEventTypeCuts, tmvaRoot);
+    TCutVec tmvaPionCuts;
+    tmvaPionCuts.push_back(preSelCut + "BDTG.eventType3 > BDTG.eventType1 && BDTG.eventType3 > BDTG.eventType2 && BDTG.eventType3 > BDTG.eventType4 && \
+        BDTG.eventType3 > BDTG.eventType5 && BDTG.eventType3 > BDTG.eventType6 && BDTG.eventType3 > BDTG.eventType7");
+    (void) getNumbers(idChainMap, idWeightMap, dummySelectionCuts, tmvaPionCuts, tmvaRoot);
 
+    TCutVec tmvaPion2YCuts;
+    tmvaPion2YCuts.push_back(preSelCut + "BDTG.eventType4 > BDTG.eventType1 && BDTG.eventType4 > BDTG.eventType2 && BDTG.eventType4 > BDTG.eventType3 && \
+        BDTG.eventType4 > BDTG.eventType5 && BDTG.eventType4 > BDTG.eventType6 && BDTG.eventType4 > BDTG.eventType7");
+    (void) getNumbers(idChainMap, idWeightMap, dummySelectionCuts, tmvaPion2YCuts, tmvaRoot);
+    
+    TCutVec tmvaPion4YCuts;
+    tmvaPion4YCuts.push_back(preSelCut + "BDTG.eventType5 > BDTG.eventType1 && BDTG.eventType5 > BDTG.eventType2 && BDTG.eventType5 > BDTG.eventType4 && \
+        BDTG.eventType5 > BDTG.eventType3 && BDTG.eventType5 > BDTG.eventType6 && BDTG.eventType5 > BDTG.eventType7");
+    (void) getNumbers(idChainMap, idWeightMap, dummySelectionCuts, tmvaPion4YCuts, tmvaRoot);
+    
+    TCutVec tmva3PionCuts;
+    tmva3PionCuts.push_back(preSelCut + "BDTG.eventType6 > BDTG.eventType1 && BDTG.eventType6 > BDTG.eventType2 && BDTG.eventType6 > BDTG.eventType4 && \
+        BDTG.eventType6 > BDTG.eventType5 && BDTG.eventType6 > BDTG.eventType3 && BDTG.eventType6 > BDTG.eventType7");
+    (void) getNumbers(idChainMap, idWeightMap, dummySelectionCuts, tmva3PionCuts, tmvaRoot);
+    
+    TCutVec tmva3Pion2YCuts;
+    tmva3Pion2YCuts.push_back(preSelCut + "BDTG.eventType7 > BDTG.eventType1 && BDTG.eventType7 > BDTG.eventType2 && BDTG.eventType7 > BDTG.eventType4 && \
+        BDTG.eventType7 > BDTG.eventType5 && BDTG.eventType7 > BDTG.eventType6 && BDTG.eventType7 > BDTG.eventType3");
+    (void) getNumbers(idChainMap, idWeightMap, dummySelectionCuts, tmva3Pion2YCuts, tmvaRoot);
+    
+    TString tmvaDefaultRoot("/var/clus/usera/xu/ILCSOFT/TauAnalysisNew/TMVA/Multiclass/TauTauAnalysis_100GeV_TMVAMulticlass.root");
+    (void) getNumbers(idChainMap, idWeightMap, muonSelectionCuts, tmvaElectronCuts, tmvaDefaultRoot);
+    (void) getNumbers(idChainMap, idWeightMap, dummySelectionCuts, tmvaMuonCuts, tmvaDefaultRoot);
+    (void) getNumbers(idChainMap, idWeightMap, dummySelectionCuts, tmvaPionCuts, tmvaDefaultRoot);
+    (void) getNumbers(idChainMap, idWeightMap, dummySelectionCuts, tmvaPion2YCuts, tmvaDefaultRoot);
+    (void) getNumbers(idChainMap, idWeightMap, dummySelectionCuts, tmvaPion4YCuts, tmvaDefaultRoot);
+    (void) getNumbers(idChainMap, idWeightMap, dummySelectionCuts, tmva3PionCuts, tmvaDefaultRoot);
+    (void) getNumbers(idChainMap, idWeightMap, dummySelectionCuts, tmva3Pion2YCuts, tmvaDefaultRoot);
 /*
  * 
     TString tmvaRoot("/var/clus/usera/xu/ILCSOFT/TauAnalysisNew/TMVA/Multiclass/TauTauAnalysis_100GeV_TMVAMulticlass.root");
