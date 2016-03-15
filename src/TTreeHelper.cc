@@ -1,5 +1,4 @@
 #include <iostream>
-
 #include <TTreeHelper.h>
 
 //------------------------------------------------------------------------------------------------------------------------------------------
@@ -150,24 +149,4 @@ double TTreeHelper::GetDoubleVar(const std::string &varName) const
     return 0.f;
 }
 
-//------------------------------------------------------------------------------------------------------------------------------------------
-
-template <typename NumberType> 
-NumberType TTreeHelper::GetVar(const std::string &varName) const
-{
-    if (m_strDoubleMap.find(varName) != m_strDoubleMap.end())
-    {
-        return m_strDoubleMap.at(varName);
-        
-    }
-    else if (m_strIntMap.find(varName) != m_strIntMap.end())
-    {
-        return m_strIntMap.at(varName);
-    }
-    else
-    {
-        std::cout<<"TTreeHelper::GetVar error m_strDoubleMap or m_strIntMap do not have "<<varName<<std::endl;
-    }
-    return 0;
-}
 

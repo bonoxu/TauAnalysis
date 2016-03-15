@@ -116,7 +116,7 @@ void BookMethod(TMVA::Factory *&pFactory, const StringIntMap &mvaMethodVec)
 
 int main(int argc, char** argv)
 {
-    Parameters parameters("TauTauAnalysisBono", "500GeV", "/r06/lc/xu/TautauAnalysis/PandoraBono/500GeV/rootCustom/tauAnalysisTemplate_mod1_*.root", "sel", 428.2776);
+    Parameters parameters("TauTauAnalysisBono", "100GeV", "/r06/lc/xu/TautauAnalysis/PandoraBono/100GeV/rootCustom/tauAnalysisTemplate_mod1_2.root", "sel", 52869);
     // ATTN assume eventtype starts at 1 ends in 1 + nEvtType
     const int nEvtType(7);
     TMVA::Tools::Instance();
@@ -144,7 +144,9 @@ int main(int argc, char** argv)
     pFactory->AddVariable( "nPfo", "nPfo", "", 'I' );
     pFactory->AddVariable( "mVis", "mVis", "", 'F' );
     pFactory->AddVariable( "nCharge", "nCharge", "", 'I' );
-    pFactory->AddVariable( "nNeutral", "nNeutral", "", 'I' );
+    pFactory->AddVariable( "eChargeMod", "eChargeMod", "", 'I' );
+    pFactory->AddVariable( "mChargeMod", "eChargeMod", "", 'F' );
+   // pFactory->AddVariable( "nNeutral", "nNeutral", "", 'I' );
     pFactory->AddVariable( "nMuon", "nMuon", "", 'I' );
     pFactory->AddVariable( "eMuon", "eMuon", "GeV", 'F' );
     pFactory->AddVariable( "nElectron", "nElectron", "", 'I' );
@@ -155,16 +157,18 @@ int main(int argc, char** argv)
     pFactory->AddVariable( "nPionCharge", "nPionCharge", "", 'I' );
     pFactory->AddVariable( "mPionCharge", "mPionCharge", "GeV", 'F' );
     pFactory->AddVariable( "ePionCharge", "ePionCharge", "GeV", 'F' );
-    pFactory->AddVariable( "logChi2RhoFit", "-logChi2 Rho Fit", "", 'F' );
-    pFactory->AddVariable( "mPionRhoFit", "mPion Rho Fit", "GeV", 'F' );
+    pFactory->AddVariable( "mPionChargeMod", "mPionChargeMod", "GeV", 'F' );
+    
+   // pFactory->AddVariable( "logChi2RhoFit", "-logChi2 Rho Fit", "", 'F' );
+   // pFactory->AddVariable( "mPionRhoFit", "mPion Rho Fit", "GeV", 'F' );
     pFactory->AddVariable( "mRhoRhoFit", "mRho Fit", "GeV", 'F' );
-    pFactory->AddVariable( "cosStarRhoFit", "cos* Rho Fit", "GeV", 'F' );
-    pFactory->AddVariable( "logChi2A1Fit", "-logChi2 A1 Fit", "", 'F' );
-    pFactory->AddVariable( "mPionLhsA1Fit", "mPion lhs A1 Fit", "GeV", 'F' );
-    pFactory->AddVariable( "mPionRhsA1Fit", "mPion Rhs A1 Fit", "GeV", 'F' );
+   // pFactory->AddVariable( "cosStarRhoFit", "cos* Rho Fit", "GeV", 'F' );
+    //pFactory->AddVariable( "logChi2A1Fit", "-logChi2 A1 Fit", "", 'F' );
+   // pFactory->AddVariable( "mPionLhsA1Fit", "mPion lhs A1 Fit", "GeV", 'F' );
+   // pFactory->AddVariable( "mPionRhsA1Fit", "mPion Rhs A1 Fit", "GeV", 'F' );
     pFactory->AddVariable( "mA1A1Fit", "mA1 Fit", "GeV", 'F' );
-    pFactory->AddVariable( "cosStarLhsA1Fit", "cos* lhs A1 Fit", "GeV", 'F' );
-    pFactory->AddVariable( "cosStarRhsA1Fit", "cos* rhs A1 Fit", "GeV", 'F' );
+   //pFactory->AddVariable( "cosStarLhsA1Fit", "cos* lhs A1 Fit", "GeV", 'F' );
+    //pFactory->AddVariable( "cosStarRhsA1Fit", "cos* rhs A1 Fit", "GeV", 'F' );
 
     pFactory->AddSpectator( "nEvt", 'I' );
     pFactory->AddSpectator( "eventType", 'I' );

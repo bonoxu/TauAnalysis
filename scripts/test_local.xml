@@ -12,8 +12,20 @@
   <global>
     <parameter name="LCIOInputFiles">     
 
-/r02/lc/xu/tau/PandoraBonoNew/200GeV/slcioZjetReco/whizard.ee_tautau_roots200.001_Tau_200GeV_00_Start0_Reco.slcio
-     
+
+/r02/lc/xu/tau/PandoraBonoNew/100GeV/slcioZjetReco/whizard.ee_tautau_roots100.001_Tau_100GeV_00_Start0_Reco.slcio
+/r02/lc/xu/tau/PandoraBonoNew/100GeV/slcioZjetReco/whizard.ee_tautau_roots100.001_Tau_100GeV_00_Start100_Reco.slcio
+/r02/lc/xu/tau/PandoraBonoNew/100GeV/slcioZjetReco/whizard.ee_tautau_roots100.001_Tau_100GeV_00_Start200_Reco.slcio
+/r02/lc/xu/tau/PandoraBonoNew/100GeV/slcioZjetReco/whizard.ee_tautau_roots100.001_Tau_100GeV_00_Start300_Reco.slcio
+/r02/lc/xu/tau/PandoraBonoNew/100GeV/slcioZjetReco/whizard.ee_tautau_roots100.001_Tau_100GeV_00_Start400_Reco.slcio
+/r02/lc/xu/tau/PandoraBonoNew/100GeV/slcioZjetReco/whizard.ee_tautau_roots100.001_Tau_100GeV_00_Start500_Reco.slcio
+/r02/lc/xu/tau/PandoraBonoNew/100GeV/slcioZjetReco/whizard.ee_tautau_roots100.001_Tau_100GeV_00_Start600_Reco.slcio
+/r02/lc/xu/tau/PandoraBonoNew/100GeV/slcioZjetReco/whizard.ee_tautau_roots100.001_Tau_100GeV_00_Start700_Reco.slcio
+/r02/lc/xu/tau/PandoraBonoNew/100GeV/slcioZjetReco/whizard.ee_tautau_roots100.001_Tau_100GeV_00_Start800_Reco.slcio
+/r02/lc/xu/tau/PandoraBonoNew/100GeV/slcioZjetReco/whizard.ee_tautau_roots100.001_Tau_100GeV_00_Start900_Reco.slcio
+/r02/lc/xu/tau/PandoraBonoNew/100GeV/slcioZjetReco/whizard.ee_tautau_roots100.001_Tau_100GeV_00_Start1000_Reco.slcio
+/r02/lc/xu/tau/PandoraBonoNew/100GeV/slcioZjetReco/whizard.ee_tautau_roots100.001_Tau_100GeV_00_Start1100_Reco.slcio
+/r02/lc/xu/tau/PandoraBonoNew/100GeV/slcioZjetReco/whizard.ee_tautau_roots100.001_Tau_100GeV_00_Start1200_Reco.slcio
 
     </parameter> <!--   /r02/lc/xu/myGridDownload/6243/e1e1_o_rec_6243_1.slcio-->
     <parameter name="MaxRecordNumber" value="-1" />  

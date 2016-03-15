@@ -28,6 +28,9 @@ public:
         M_CHARGE,
         E_CHARGE,
         
+        M_CHARGE_MOD,
+        E_CHARGE_MOD,
+        
         N_NEUTRAL,
         M_NEUTRAL,
         E_NEUTRAL,
@@ -46,6 +49,9 @@ public:
         M_PIONCHARGE,
         E_PIONCHARGE,
 
+        M_PIONCHARGE_MOD,
+        E_PIONCHARGE_MOD,
+        
         LOGCHI_RHOFIT,
         M_PION_RHOFIT,
         M_RHO_RHOFIT,
@@ -93,6 +99,11 @@ public:
             case E_CHARGE:
                 return "eCharge";
 
+            case M_CHARGE_MOD:
+                return "mChargeMod";
+            case E_CHARGE_MOD:
+                return "eChargeMod";
+
             case N_NEUTRAL:
                 return "nNeutral";
             case M_NEUTRAL:
@@ -123,6 +134,11 @@ public:
                 return "mPionCharge";
             case E_PIONCHARGE:
                 return "ePionCharge";
+
+            case M_PIONCHARGE_MOD:
+                return "mPionChargeMod";
+            case E_PIONCHARGE_MOD:
+                return "ePionChargeMod";
 
             case LOGCHI_RHOFIT:
                 return "logChi2RhoFit";

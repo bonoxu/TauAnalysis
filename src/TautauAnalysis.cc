@@ -14,7 +14,7 @@
 #include "UTIL/LCRelationNavigator.h"
 
 #include "TLorentzVector.h"
-
+#include "TTreeHelper.h"
 #include "AlgorithmHelper.h"
 #include "VarName.h"
 #include "PdgTable.h"
@@ -261,7 +261,8 @@ void TautauAnalysis::AnalyseHemisphereMC(const MCParticle* pMainMC, LCCollection
         for (EVENT::MCParticleVec::const_iterator iter = mcDaughterVec.begin(), iterEnd = mcDaughterVec.end(); iter != iterEnd; ++iter)
         {
             const MCParticle* pMCDaughter(*iter);
-            if (!particleCloseToZ && RecoHelper::IsParticleInZAngle(pMCDaughter->getMomentum(), 0.2))
+            
+            if (!particleCloseToZ && 0 != pMCDaughter->getCharge() && RecoHelper::IsParticleInZAngle(pMCDaughter->getMomentum(), 0.3))
                 particleCloseToZ = true;
 
             const int daughterPDG(std::fabs(pMCDaughter->getPDG()));
@@ -380,7 +381,7 @@ void TautauAnalysis::AnalyseHemisphereMC(const MCParticle* pMainMC, LCCollection
 void TautauAnalysis::AnalyseHemisphereReco(const EVENT::ReconstructedParticleVec &pfoVec, LCCollection* pPfoCollection)
 {
     double eECal(0.f), eHCal(0.f);
-    ReconstructedParticleVec chargeVec, neutralVec;
+    ReconstructedParticleVec chargeVec, neutralVec, neutralHadronVec;
     for (EVENT::ReconstructedParticleVec::const_iterator iter = pfoVec.begin(), iterEnd = pfoVec.end(); iter != iterEnd; ++iter)
     {
         ReconstructedParticle * pReco(*iter);
@@ -397,7 +398,18 @@ void TautauAnalysis::AnalyseHemisphereReco(const EVENT::ReconstructedParticleVec
         else
         {
             neutralVec.push_back(pReco);
+            if (PHOTON != std::fabs(pReco->getType()))
+            {
+                neutralHadronVec.push_back(pReco);
+                for ( EVENT::ClusterVec::const_iterator jIter = pReco->getClusters().begin(), jIterEnd = pReco->getClusters().end(); jIter != jIterEnd; ++jIter) 
+                {
+                    const Cluster *pCluster(*jIter);
+                    eECal += pCluster->getSubdetectorEnergies()[0];
+                    eHCal += pCluster->getSubdetectorEnergies()[1];
+                }
+            }
         }
+        streamlog_out(DEBUG) << "pfo type " << pReco->getType() << " angle " << RecoHelper::GetMomFromRecoParticle(pReco).CosTheta() << std::endl;
     }
     const double eEHCalRatio((eECal + eHCal > std::numeric_limits<double>::epsilon()) ? eECal / (eECal + eHCal) : 0.f);
 
@@ -417,52 +429,80 @@ void TautauAnalysis::AnalyseHemisphereReco(const EVENT::ReconstructedParticleVec
     const TLorentzVector visMom(RecoHelper::GetMomFromRecoParticleVec(pfoVec)), chargeMom(RecoHelper::GetMomFromRecoParticleVec(chargeVec)), 
         neutralMom(RecoHelper::GetMomFromRecoParticleVec(neutralVec)), photonMom(RecoHelper::GetMomFromRecoParticleVec(photonVec)), 
         electronMom(RecoHelper::GetMomFromRecoParticleVec(electronVec)), muonMom(RecoHelper::GetMomFromRecoParticleVec(muonVec)), 
-        pionChargeMom(RecoHelper::GetMomFromRecoParticleVec(pionChargeVec));
+        pionChargeMom(RecoHelper::GetMomFromRecoParticleVec(pionChargeVec)), neutralHadronMom(RecoHelper::GetMomFromRecoParticleVec(neutralHadronVec));
     
     const int nPhoton(RecoHelper::GetNPfo(pfoVec, PHOTON)), nPionCharge(pionChargeVec.size());
     
+    // TODO, do charged particle + neutral + photon test
     // rho test
     float rhoChi2(std::numeric_limits<float>::max());
     ReconstructedParticleVec rhoFitPionChargeVec, rhoFitPhotonVec;
+    float rhoChi2NegLog(-std::numeric_limits<float>::max()), rhoFitPionZeroM(0.f), rhoFitRhoM(0.f), rhoFitCosStarPhoton(0.f);
     if (nPionCharge > 0  && nPhoton > 1)
     {
-        rhoChi2 = this->Chi2FitRho770(pfoVec, rhoFitPionChargeVec, rhoFitPhotonVec);
+        rhoChi2 = this->Chi2FitRho770(pfoVec, 1, 2, rhoFitPionChargeVec, rhoFitPhotonVec);
+        if (!rhoFitPionChargeVec.empty() && (rhoFitPhotonVec.size() > 1))
+        {
+            rhoFitCosStarPhoton = RecoHelper::GetCosineInCoMFrame(RecoHelper::GetMomFromRecoParticle(rhoFitPhotonVec[0]), RecoHelper::GetMomFromRecoParticle(rhoFitPhotonVec[1]));
+        }
     }
-    float rhoChi2NegLog(-std::numeric_limits<float>::max()), rhoFitPionZeroM(0.f), rhoFitRhoM(0.f), rhoFitCosStarPhoton(0.f);
-    if (!rhoFitPionChargeVec.empty() && (rhoFitPhotonVec.size() > 1))
+    else if (nPionCharge > 0  && nPhoton == 1)
     {
-        rhoChi2NegLog = - std::log(rhoChi2);
-        rhoFitPionZeroM = RecoHelper::GetMomFromRecoParticleVec(rhoFitPhotonVec).M();
-        rhoFitRhoM = (RecoHelper::GetMomFromRecoParticleVec(rhoFitPhotonVec) + RecoHelper::GetMomFromRecoParticleVec(rhoFitPionChargeVec)).M();
-        rhoFitCosStarPhoton = RecoHelper::GetCosineInCoMFrame(RecoHelper::GetMomFromRecoParticle(rhoFitPhotonVec[0]), RecoHelper::GetMomFromRecoParticle(rhoFitPhotonVec[1]));
+        rhoChi2 = this->Chi2FitRho770(pfoVec, 1, 1, rhoFitPionChargeVec, rhoFitPhotonVec);
     }
-    else
-    {
-        rhoChi2NegLog = -std::log(-rhoChi2NegLog);
-    }
+    rhoChi2NegLog = - std::log(rhoChi2);
+    rhoFitPionZeroM = RecoHelper::GetMomFromRecoParticleVec(rhoFitPhotonVec).M();
+    rhoFitRhoM = (RecoHelper::GetMomFromRecoParticleVec(rhoFitPhotonVec) + RecoHelper::GetMomFromRecoParticleVec(rhoFitPionChargeVec) + 
+        RecoHelper::GetMomFromRecoParticleVec(neutralHadronVec)).M();
+
 
     // a1 test
     float a1Chi2(std::numeric_limits<float>::max());
     ReconstructedParticleVec a1FitPionChargeVec, a1FitPhotonVecLhs, a1FitPhotonVecRhs;
+    float a1Chi2NegLog(-std::numeric_limits<float>::max()), a1FitPionZeroLhsM(0.f), a1FitPionZeroRhsM(0.f), a1FitA1M(0.f), a1FitCosStarLhs(0.f), a1FitCosStarRhs(0.f);
     if (nPionCharge > 0  && nPhoton > 3)
     {
-        a1Chi2 = this->Chi2FitA11260(pfoVec, a1FitPionChargeVec, a1FitPhotonVecLhs, a1FitPhotonVecRhs);
+        a1Chi2 = this->Chi2FitA11260(pfoVec, 1, 2, 2, a1FitPionChargeVec, a1FitPhotonVecLhs, a1FitPhotonVecRhs);
+        if (!a1FitPionChargeVec.empty() && (a1FitPhotonVecLhs.size() > 1) && (a1FitPhotonVecRhs.size() > 1))
+        {
+            a1FitCosStarLhs = RecoHelper::GetCosineInCoMFrame(RecoHelper::GetMomFromRecoParticle(a1FitPhotonVecLhs[0]), RecoHelper::GetMomFromRecoParticle(a1FitPhotonVecLhs[1]));
+            a1FitCosStarRhs = RecoHelper::GetCosineInCoMFrame(RecoHelper::GetMomFromRecoParticle(a1FitPhotonVecRhs[0]), RecoHelper::GetMomFromRecoParticle(a1FitPhotonVecRhs[1]));
+        }
     }
-    float a1Chi2NegLog(-std::numeric_limits<float>::max()), a1FitPionZeroLhsM(0.f), a1FitPionZeroRhsM(0.f), a1FitA1M(0.f), a1FitCosStarLhs(0.f), a1FitCosStarRhs(0.f);
-    if (!a1FitPionChargeVec.empty() && (a1FitPhotonVecLhs.size() > 1) && (a1FitPhotonVecRhs.size() > 1))
+    else if (nPionCharge > 0  && nPhoton == 3)
     {
-        a1Chi2NegLog = - std::log(a1Chi2);
-        a1FitPionZeroLhsM = RecoHelper::GetMomFromRecoParticleVec(a1FitPhotonVecLhs).M();
-        a1FitPionZeroRhsM = RecoHelper::GetMomFromRecoParticleVec(a1FitPhotonVecRhs).M();
-        a1FitA1M = (RecoHelper::GetMomFromRecoParticleVec(a1FitPhotonVecLhs)  + RecoHelper::GetMomFromRecoParticleVec(a1FitPhotonVecRhs) + 
-            RecoHelper::GetMomFromRecoParticleVec(a1FitPionChargeVec)).M();
-        a1FitCosStarLhs = RecoHelper::GetCosineInCoMFrame(RecoHelper::GetMomFromRecoParticle(a1FitPhotonVecLhs[0]), RecoHelper::GetMomFromRecoParticle(a1FitPhotonVecLhs[1]));
-        a1FitCosStarRhs = RecoHelper::GetCosineInCoMFrame(RecoHelper::GetMomFromRecoParticle(a1FitPhotonVecRhs[0]), RecoHelper::GetMomFromRecoParticle(a1FitPhotonVecRhs[1]));
+        a1Chi2 = this->Chi2FitA11260(pfoVec, 1, 2, 1, a1FitPionChargeVec, a1FitPhotonVecLhs, a1FitPhotonVecRhs);
+        if (!a1FitPionChargeVec.empty() && (a1FitPhotonVecLhs.size() > 1) && (a1FitPhotonVecRhs.size() > 0))
+        {
+            a1FitCosStarLhs = RecoHelper::GetCosineInCoMFrame(RecoHelper::GetMomFromRecoParticle(a1FitPhotonVecLhs[0]), RecoHelper::GetMomFromRecoParticle(a1FitPhotonVecLhs[1]));
+        }
     }
-    else
+    else if (nPionCharge > 0  && nPhoton == 2)
     {
-        a1Chi2NegLog = - std::log(-a1Chi2NegLog);
+        const float a1Chi2Option1(this->Chi2FitA11260(pfoVec, 1, 2, 0, a1FitPionChargeVec, a1FitPhotonVecLhs, a1FitPhotonVecRhs) / 2.f);
+        const float a1Chi2Option2(this->Chi2FitA11260(pfoVec, 1, 1, 1, a1FitPionChargeVec, a1FitPhotonVecLhs, a1FitPhotonVecRhs));
+        if (a1Chi2Option1 < a1Chi2Option2)
+        {
+            a1Chi2 = this->Chi2FitA11260(pfoVec, 1, 2, 0, a1FitPionChargeVec, a1FitPhotonVecLhs, a1FitPhotonVecRhs);
+        }
+        else
+        {
+            a1Chi2 = this->Chi2FitA11260(pfoVec, 1, 1, 1, a1FitPionChargeVec, a1FitPhotonVecLhs, a1FitPhotonVecRhs);
+        }
     }
+    else if (nPionCharge > 0  && nPhoton == 1)
+    {
+        a1Chi2 = this->Chi2FitA11260(pfoVec, 1, 1, 0, a1FitPionChargeVec, a1FitPhotonVecLhs, a1FitPhotonVecRhs);
+    }
+    
+    a1FitPionZeroLhsM = RecoHelper::GetMomFromRecoParticleVec(a1FitPhotonVecLhs).M();
+    a1FitPionZeroRhsM = RecoHelper::GetMomFromRecoParticleVec(a1FitPhotonVecRhs).M();
+    a1FitA1M = (RecoHelper::GetMomFromRecoParticleVec(a1FitPhotonVecLhs)  + RecoHelper::GetMomFromRecoParticleVec(a1FitPhotonVecRhs) + 
+        RecoHelper::GetMomFromRecoParticleVec(a1FitPionChargeVec) + RecoHelper::GetMomFromRecoParticleVec(neutralHadronVec)).M();
+    
+    //if (E == m_pTTreeHelper->GetVar<int>(VarName::GetName(VarName::EVENT_TYPE)) && chargeVec.empty() && !m_pTTreeHelper->GetVar<int>(VarName::GetName(VarName::MC_CLOSE_Z)))
+    if (MU == m_pTTreeHelper->GetVar<int>(VarName::GetName(VarName::EVENT_TYPE)) && muonVec.empty() && !m_pTTreeHelper->GetVar<int>(VarName::GetName(VarName::MC_CLOSE_Z)))
+        std::cin.get();
 
     m_pTTreeHelper->SetVar(VarName::GetName(VarName::E_EHCAL_RATIO),  eEHCalRatio);
 
@@ -478,6 +518,9 @@ void TautauAnalysis::AnalyseHemisphereReco(const EVENT::ReconstructedParticleVec
     m_pTTreeHelper->SetVar(VarName::GetName(VarName::M_CHARGE),  chargeMom.M());
     m_pTTreeHelper->SetVar(VarName::GetName(VarName::E_CHARGE),  chargeMom.E());
     
+    m_pTTreeHelper->SetVar(VarName::GetName(VarName::M_CHARGE_MOD),  (chargeMom + neutralHadronMom).M());
+    m_pTTreeHelper->SetVar(VarName::GetName(VarName::E_CHARGE_MOD),  (chargeMom + neutralHadronMom).E());
+    
     m_pTTreeHelper->SetVar(VarName::GetName(VarName::N_MU),  muonVec.size());
     m_pTTreeHelper->SetVar(VarName::GetName(VarName::E_MU),  muonMom.E());
     
@@ -491,6 +534,9 @@ void TautauAnalysis::AnalyseHemisphereReco(const EVENT::ReconstructedParticleVec
     m_pTTreeHelper->SetVar(VarName::GetName(VarName::N_PIONCHARGE), nPionCharge);
     m_pTTreeHelper->SetVar(VarName::GetName(VarName::M_PIONCHARGE), pionChargeMom.M());
     m_pTTreeHelper->SetVar(VarName::GetName(VarName::E_PIONCHARGE), pionChargeMom.E());
+
+    m_pTTreeHelper->SetVar(VarName::GetName(VarName::M_PIONCHARGE_MOD), (pionChargeMom + neutralHadronMom).M());
+    m_pTTreeHelper->SetVar(VarName::GetName(VarName::E_PIONCHARGE_MOD), (pionChargeMom + neutralHadronMom).E());
 
     m_pTTreeHelper->SetVar(VarName::GetName(VarName::LOGCHI_RHOFIT), rhoChi2NegLog);
     m_pTTreeHelper->SetVar(VarName::GetName(VarName::M_PION_RHOFIT), rhoFitPionZeroM);
@@ -655,8 +701,8 @@ void TautauAnalysis::AnalysePionNutralMC(const MCParticle* pMCPion, int &nPhoton
 
 //-----------------------------------------------------------------------------------------------------------------------------------------
 
-float TautauAnalysis::Chi2FitRho770(const EVENT::ReconstructedParticleVec &inputPfoVec, EVENT::ReconstructedParticleVec &pionChargePfoVec,
-    EVENT::ReconstructedParticleVec &photonPfoVec) const
+float TautauAnalysis::Chi2FitRho770(const EVENT::ReconstructedParticleVec &inputPfoVec, const int nPionChargeFit, const int nPhotonFit,
+    EVENT::ReconstructedParticleVec &pionChargePfoVec, EVENT::ReconstructedParticleVec &photonPfoVec) const
 {
     EVENT::ReconstructedParticleVec pionChargedVec(RecoHelper::GetPfoVec(inputPfoVec, PI_PLUS));
     EVENT::ReconstructedParticleVec photonVec(RecoHelper::GetPfoVec(inputPfoVec, PHOTON));
@@ -667,8 +713,9 @@ float TautauAnalysis::Chi2FitRho770(const EVENT::ReconstructedParticleVec &input
     std::vector<int> photonOrder;
     for (unsigned int iter = 0; iter < photonVec.size(); photonOrder.push_back(iter++));
 
-    const int nPionChargeFit(1), nPhotonFit(2);
+    //const int nPionChargeFit(1), nPhotonFit(2);
     float bestChi2(std::numeric_limits<float>::max());
+    const float sigmaPion(PdgTable::GetParticleMass(PI_ZERO) * 0.2), sigmaRho(PdgTable::GetParticleMass(RHO_770_PLUS) * 0.2);
     do
     {
         EVENT::ReconstructedParticleVec pionChargedFitVec;
@@ -682,8 +729,8 @@ float TautauAnalysis::Chi2FitRho770(const EVENT::ReconstructedParticleVec &input
             const TLorentzVector photonMom(RecoHelper::GetMomFromRecoParticleVec(photonFitVec));
             const TLorentzVector totalMom(RecoHelper::GetMomFromRecoParticleVec(pionChargedFitVec) + photonMom);
             
-            const float pionChi2((photonMom.M() / PdgTable::GetParticleMass(PI_ZERO) - 1.f) * (photonMom.M() / PdgTable::GetParticleMass(PI_ZERO) - 1.f));
-            const float rhoChi2((totalMom.M() / PdgTable::GetParticleMass(RHO_770_PLUS) - 1.f) * (totalMom.M() / PdgTable::GetParticleMass(RHO_770_PLUS) - 1.f));
+            const float pionChi2(nPhotonFit < 2 ? 0.f : std::pow((photonMom.M() - PdgTable::GetParticleMass(PI_ZERO)) / sigmaPion, 2));
+            const float rhoChi2(std::pow((totalMom.M() - PdgTable::GetParticleMass(RHO_770_PLUS)) / sigmaRho, 2));
             const float chi2(pionChi2 + rhoChi2);
             
             if (chi2 < bestChi2)
@@ -709,8 +756,9 @@ float TautauAnalysis::Chi2FitRho770(const EVENT::ReconstructedParticleVec &input
 
 //-----------------------------------------------------------------------------------------------------------------------------------------
 
-float TautauAnalysis::Chi2FitA11260(const EVENT::ReconstructedParticleVec &inputPfoVec, EVENT::ReconstructedParticleVec &pionChargePfoVec,
-    EVENT::ReconstructedParticleVec &photonPfoVecLhs, EVENT::ReconstructedParticleVec &photonPfoVecRhs) const
+float TautauAnalysis::Chi2FitA11260(const EVENT::ReconstructedParticleVec &inputPfoVec, const int nPionChargeFit, const int nPhotonFitLhs,
+    const int nPhotonFitRhs, EVENT::ReconstructedParticleVec &pionChargePfoVec, EVENT::ReconstructedParticleVec &photonPfoVecLhs,
+    EVENT::ReconstructedParticleVec &photonPfoVecRhs) const
 {
     EVENT::ReconstructedParticleVec pionChargedVec(RecoHelper::GetPfoVec(inputPfoVec, PI_PLUS));
     EVENT::ReconstructedParticleVec photonVec(RecoHelper::GetPfoVec(inputPfoVec, PHOTON));
@@ -720,33 +768,31 @@ float TautauAnalysis::Chi2FitA11260(const EVENT::ReconstructedParticleVec &input
     
     IntVec photonOrder;
     for (unsigned int iter = 0; iter < photonVec.size(); photonOrder.push_back(iter++));
-
-    const int nPionChargeFit(1), nPhotonFit(4), nPionFit(2);
+    //const int nPionChargeFit(1), nPhotonFit(4), nPionFit(2);
+    const int nPhotonFit(nPhotonFitLhs + nPhotonFitRhs), nPionFit(nPhotonFitLhs);
     float bestChi2(std::numeric_limits<float>::max());
+    const float sigmaPion(PdgTable::GetParticleMass(PI_ZERO) * 0.2), sigmaA1(PdgTable::GetParticleMass(A1_1260_PLUS) * 0.2);
     do
     {
         EVENT::ReconstructedParticleVec pionChargedFitVec;
         for (int iter = 0; iter < nPionChargeFit; pionChargedFitVec.push_back(pionChargedVec[pionChargeOrder[iter++]]));
-        
         do
         {
             IntVec pionOrder;
             for (int iter = 0; iter < nPhotonFit; pionOrder.push_back(photonOrder[iter++]));
-            
             do
             {
                 EVENT::ReconstructedParticleVec pionFitVecLhs;
                 for (int iter = 0; iter < nPionFit; pionFitVecLhs.push_back(photonVec[pionOrder[iter++]]));
                 EVENT::ReconstructedParticleVec pionFitVecRhs;
                 for (int iter = nPionFit; iter < nPhotonFit; pionFitVecRhs.push_back(photonVec[pionOrder[iter++]]));
-                
                 const TLorentzVector pionLhsMom(RecoHelper::GetMomFromRecoParticleVec(pionFitVecLhs));
                 const TLorentzVector pionRhsMom(RecoHelper::GetMomFromRecoParticleVec(pionFitVecRhs));
                 const TLorentzVector totalMom(RecoHelper::GetMomFromRecoParticleVec(pionChargedFitVec) + pionLhsMom + pionRhsMom);
                 
-                const float pionChi2Lhs((pionLhsMom.M() / PdgTable::GetParticleMass(PI_ZERO) - 1.f) * (pionLhsMom.M() / PdgTable::GetParticleMass(PI_ZERO) - 1.f));
-                const float pionChi2Rhs((pionRhsMom.M() / PdgTable::GetParticleMass(PI_ZERO) - 1.f) * (pionRhsMom.M() / PdgTable::GetParticleMass(PI_ZERO) - 1.f));
-                const float rhoChi2((totalMom.M() / PdgTable::GetParticleMass(A1_1260_PLUS) - 1.f) * (totalMom.M() / PdgTable::GetParticleMass(A1_1260_PLUS) - 1.f));
+                const float pionChi2Lhs(nPhotonFitLhs < 2 ? 0.f : std::pow((pionLhsMom.M() - PdgTable::GetParticleMass(PI_ZERO)) / sigmaPion, 2));
+                const float pionChi2Rhs(nPhotonFitRhs < 2 ? 0.f : std::pow((pionRhsMom.M() - PdgTable::GetParticleMass(PI_ZERO)) / sigmaPion, 2));
+                const float rhoChi2(std::pow((totalMom.M() - PdgTable::GetParticleMass(A1_1260_PLUS)) / sigmaA1, 2));
                 const float chi2(pionChi2Lhs + pionChi2Rhs + rhoChi2);
                 
                 if (pionChi2Lhs < pionChi2Rhs && chi2 < bestChi2)
@@ -773,4 +819,18 @@ float TautauAnalysis::Chi2FitA11260(const EVENT::ReconstructedParticleVec &input
     //    " cos* " << RecoHelper::GetCosineInCoMFrame(RecoHelper::GetMomFromRecoParticle(photonPfoVecLhs[0]), RecoHelper::GetMomFromRecoParticle(photonPfoVecLhs[1]))<< std::endl;
     //std::cin.get();
     return bestChi2;
+}
+
+//-----------------------------------------------------------------------------------------------------------------------------------------
+
+float TautauAnalysis::GetECalResolution(const float energy) const
+{
+    return energy * std::sqrt(std::pow(0.166 / std::sqrt(energy), 2) + std::pow(0.01, 2));
+}
+
+//-----------------------------------------------------------------------------------------------------------------------------------------
+
+float TautauAnalysis::GetTrackingResolution(const float momentum) const
+{
+    return 2E-5 * momentum;
 }

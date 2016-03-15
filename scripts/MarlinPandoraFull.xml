@@ -36,21 +36,30 @@
      <processor name="MyRecoMCTruthLinker"/>
      <processor name="MyMarlinPandora"/>
      <!--processor name="MyPfoAnalysis"/-->
-     <processor name="MyMarlinPandora2"/>
+     <!--processor name="MyMarlinPandora2"/-->
      <!--processor name="MyPfoAnalysis2"/-->
      <!--processor name="MyMarlinPandora3"/-->
    </execute>
 
    <global> <!--   -->
       <parameter name="LCIOInputFiles">
-/r02/lc/xu/myGridDownload/tautauBono/200GeV/whizard.ee_tautau_roots200.001_Tau_200GeV_00_Start0.slcio
 
-
+/r02/lc/xu/myGridDownload/tautauBono/100GeV/whizard.ee_tautau_roots100.001_Tau_100GeV_00_Start0.slcio
+/r02/lc/xu/myGridDownload/tautauBono/100GeV/whizard.ee_tautau_roots100.001_Tau_100GeV_00_Start100.slcio
+/r02/lc/xu/myGridDownload/tautauBono/100GeV/whizard.ee_tautau_roots100.001_Tau_100GeV_00_Start200.slcio
+/r02/lc/xu/myGridDownload/tautauBono/100GeV/whizard.ee_tautau_roots100.001_Tau_100GeV_00_Start300.slcio
+/r02/lc/xu/myGridDownload/tautauBono/100GeV/whizard.ee_tautau_roots100.001_Tau_100GeV_00_Start400.slcio
+/r02/lc/xu/myGridDownload/tautauBono/100GeV/whizard.ee_tautau_roots100.001_Tau_100GeV_00_Start500.slcio
+/r02/lc/xu/myGridDownload/tautauBono/100GeV/whizard.ee_tautau_roots100.001_Tau_100GeV_00_Start600.slcio
+/r02/lc/xu/myGridDownload/tautauBono/100GeV/whizard.ee_tautau_roots100.001_Tau_100GeV_00_Start700.slcio
+/r02/lc/xu/myGridDownload/tautauBono/100GeV/whizard.ee_tautau_roots100.001_Tau_100GeV_00_Start800.slcio
+/r02/lc/xu/myGridDownload/tautauBono/100GeV/whizard.ee_tautau_roots100.001_Tau_100GeV_00_Start900.slcio
+/r02/lc/xu/myGridDownload/tautauBono/100GeV/whizard.ee_tautau_roots100.001_Tau_100GeV_00_Start1000.slcio
       </parameter>
       <parameter name="GearXMLFile" value="/usera/xu/ILCSOFT/myGridDownload/ILD_o1_v06_SiW_5x5.gear"/>
       <!--../test/gear.xml /r02/lc/xu/udsJet/list/ILD_o1_v05_SiW_5x5.gear /var/clus/usera/xu/ILCSOFT/TauAnalysis/steer/ILD_o1_v06_SiW_5x5.gear /usera/xu/ILCSOFT/myGridDownload/ILD_o1_v06_SiW_5x5.gear /r02/lc/xu/eMinus/20150928/gear/ILD_o1_v05_SiW_5x5.gear-->
-      <parameter name="MaxRecordNumber" value="3"/>
-      <parameter name="SkipNEvents" value="1"/>
+      <parameter name="MaxRecordNumber" value="-1"/>
+      <parameter name="SkipNEvents" value="1015"/>
       <parameter name="SupressCheck" value="false"/>
       <parameter name="Verbosity" options="DEBUG0-4,MESSAGE0-4,WARNING0-4,ERROR0-4,SILENT"> MESSAGE </parameter>
       <parameter name="RandomSeed" value="1234567890" />

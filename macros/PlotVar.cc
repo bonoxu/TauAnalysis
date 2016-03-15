@@ -30,19 +30,21 @@ typedef std::map<TString, double> TStringDoubleMap;
 class Parameters
 {
 public:
-    Parameters(const TString &name, const TString &tfileName, const TString &ttreeName, const TStringDoubleMap &eventTypeTotalWeightMap);
+    Parameters(const TString &name, const TString &tfileName, const TString &ttreeName, const TStringDoubleMap &eventTypeTotalWeightMap, const TCut &commonCut);
     
     TChain              *m_pTChain;
     TStringDoubleMap     m_evtTypeWeightMap;
     TString              m_name;
+    TCut                 m_commonCut;
 };
 
 typedef std::vector<Parameters> ParametersVec;
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-Parameters::Parameters(const TString &name, const TString &tfileName, const TString &ttreeName, const TStringDoubleMap &eventTypeTotalWeightMap):
-m_name(name)
+Parameters::Parameters(const TString &name, const TString &tfileName, const TString &ttreeName, const TStringDoubleMap &eventTypeTotalWeightMap, const TCut &commonCut):
+m_name(name),
+m_commonCut(commonCut)
 {
     m_pTChain = new TChain(ttreeName.Data());
     m_pTChain->Add(tfileName.Data());
@@ -50,6 +52,12 @@ m_name(name)
     m_evtTypeWeightMap = eventTypeTotalWeightMap;
     for (TStringDoubleMap::const_iterator iter = eventTypeTotalWeightMap.begin(), iterEnd = eventTypeTotalWeightMap.end(); iter != iterEnd; ++iter)
     {
+        // ATTN chain needs to be initialised first. This uselessEntries will always be the same as m_pTChain->GetEntries(), no matter what cut is
+        if (eventTypeTotalWeightMap.begin() == iter)
+        {
+            const int uselessEntries(m_pTChain->GetEntries(TCut(iter->first) + commonCut));
+            const int uselessEntries2(m_pTChain->GetEntries(TCut(iter->first) + commonCut));
+        }
         const double totalWeight(iter->second);
         if (totalWeight < std::numeric_limits<double>::epsilon())
         {
@@ -57,7 +65,7 @@ m_name(name)
         }
         else
         {
-            m_evtTypeWeightMap.at(iter->first) = totalWeight / static_cast<double>(m_pTChain->GetEntries(iter->first));
+            m_evtTypeWeightMap.at(iter->first) = totalWeight / static_cast<double>(m_pTChain->GetEntries(TCut(iter->first) + commonCut));
         }
     }
 }
@@ -298,13 +306,13 @@ void setStyle()
 
 void setHistStyle(TH1 *&pHist, const Hist1DParameters &hist1Dparameters, const int counter)
 {
+    const int arrColour[] = {TColor::GetColor(114,147,203),TColor::GetColor(225,151,76),TColor::GetColor(131,186,91),
+        TColor::GetColor(211,94,96),TColor::GetColor(128,133,133),TColor::GetColor(144,103,167),
+        TColor::GetColor(171,104,87),TColor::GetColor(204,194,16)};
+
     const int arrColourFill[] = {TColor::GetColor(57,106,177),TColor::GetColor(218,124,48),TColor::GetColor(62,150,81),
         TColor::GetColor(204,37,41),TColor::GetColor(83,81,84),TColor::GetColor(107,76,154),
         TColor::GetColor(146,36,40),TColor::GetColor(148,139,61)};
-    const int arrColour[] = {TColor::GetColor(114,147,203),TColor::GetColor(225,151,76),TColor::GetColor(131,186,91),
-        TColor::GetColor(57,106,177),TColor::GetColor(218,124,48),TColor::GetColor(62,150,81),
-        TColor::GetColor(211,94,96),TColor::GetColor(128,133,133),TColor::GetColor(144,103,167),
-        TColor::GetColor(171,104,87),TColor::GetColor(204,194,16)};
         
     pHist->SetLineColor(arrColour[(counter % sizeof(arrColour))]);
     pHist->SetFillStyle(3001 + counter);
@@ -346,7 +354,7 @@ TString getName(const TString &tstring)
     }
     else if (tstring.Contains("eventType == 7"))
     {
-        return "#pi^{-}#pi^{0}";
+        return "#pi^{-}#pi^{+}#pi^{-}#pi^{0}";
     }
     return tstring;
 }
@@ -377,18 +385,36 @@ int main(int argc, char* argv[]) {
     evtTypeTotalWeightMap.insert(TStringDoubleMap::value_type("eventType == 5", 1.f));
     evtTypeTotalWeightMap.insert(TStringDoubleMap::value_type("eventType == 6", 1.f));
     evtTypeTotalWeightMap.insert(TStringDoubleMap::value_type("eventType == 7", 1.f));
-    
+    const bool debugFlag(false);
+    const TCut commonCut("photonEC < 1 && mcCloseToZ < 1");
     ParametersVec parametersVec;
-    parametersVec.push_back(Parameters("100GeV_improved", "/r06/lc/xu/TautauAnalysis/PandoraBono/100GeV/rootCustom/tauAnalysisTemplate_mod1_*.root", "sel", evtTypeTotalWeightMap));
-    parametersVec.push_back(Parameters("100GeV_old", "/r06/lc/xu/TautauAnalysis/PandoraDefault/100GeV/rootCustom/tauAnalysisTemplate_mod1_*.root", "sel", evtTypeTotalWeightMap));
+    parametersVec.push_back(Parameters("100GeV_improved", "/r06/lc/xu/TautauAnalysis/PandoraBono/100GeV/rootCustom/tauAnalysisTemplate_mod1_*.root", "sel", evtTypeTotalWeightMap, commonCut));
+    //parametersVec.push_back(Parameters("200GeV_improved", "/r06/lc/xu/TautauAnalysis/PandoraBono/200GeV/rootCustom/tauAnalysisTemplate_mod1_*.root", "sel", evtTypeTotalWeightMap));
+    //parametersVec.push_back(Parameters("500GeV_improved", "/r06/lc/xu/TautauAnalysis/PandoraBono/500GeV/rootCustom/tauAnalysisTemplate_mod1_*.root", "sel", evtTypeTotalWeightMap));
     //parametersVec.push_back(Parameters("1000GeV_improved", "/r06/lc/xu/TautauAnalysis/PandoraBono/1000GeV/rootCustom/tauAnalysisTemplate_mod1_*.root", "sel", evtTypeTotalWeightMap));
+    parametersVec.push_back(Parameters("100GeV_old", "/r06/lc/xu/TautauAnalysis/PandoraDefault/100GeV/rootCustom/tauAnalysisTemplate_mod1_*.root", "sel", evtTypeTotalWeightMap, commonCut));
+    //parametersVec.push_back(Parameters("200GeV_old", "/r06/lc/xu/TautauAnalysis/PandoraDefault/200GeV/rootCustom/tauAnalysisTemplate_mod1_*.root", "sel", evtTypeTotalWeightMap));
+    //parametersVec.push_back(Parameters("500GeV_old", "/r06/lc/xu/TautauAnalysis/PandoraDefault/500GeV/rootCustom/tauAnalysisTemplate_mod1_*.root", "sel", evtTypeTotalWeightMap));
     //parametersVec.push_back(Parameters("1000GeV_old", "/r06/lc/xu/TautauAnalysis/PandoraDefault/1000GeV/rootCustom/tauAnalysisTemplate_mod1_*.root", "sel", evtTypeTotalWeightMap));
-    parametersVec.push_back(Parameters("500GeV_improved", "/r06/lc/xu/TautauAnalysis/PandoraBono/500GeV/rootCustom/tauAnalysisTemplate_mod1_*.root", "sel", evtTypeTotalWeightMap));
-    parametersVec.push_back(Parameters("500GeV_old", "/r06/lc/xu/TautauAnalysis/PandoraDefault/500GeV/rootCustom/tauAnalysisTemplate_mod1_*.root", "sel", evtTypeTotalWeightMap));
     
+
     Hist1DParametersVec hist1DParametersVec;
-    hist1DParametersVec.push_back(Hist1DParameters("nPhoton", -0.5, 6.5, 7, 0, 0, "", "", "Number of photons", "Normalised entries" ));
+    //hist1DParametersVec.push_back(Hist1DParameters("nPhoton", -0.5, 6.5, 7, 0, 0, "", "", "Number of photons", "Normalised entries" ));
+    //hist1DParametersVec.push_back(Hist1DParameters("nElectron", -0.5, 6.5, 7, 0, 1, "", "", "Number of e^{-}", "Normalised entries" ));
+    hist1DParametersVec.push_back(Hist1DParameters("nMuon", -0.5, 6.5, 7, 0, 1, "", "", "Number of #mu^{-}", "Normalised entries" ));
+    //hist1DParametersVec.push_back(Hist1DParameters("nCharge", -0.5, 6.5, 7, 0, 0, "", "", "Number of charged PFOs", "Normalised entries" ));
+    //hist1DParametersVec.push_back(Hist1DParameters("nPionCharge", -0.5, 6.5, 7, 0, 0, "", "", "Number of #pi^{+/-}", "Normalised entries" ));
+    //hist1DParametersVec.push_back(Hist1DParameters("mPionRhoFit", 0.01, 0.4, 100, 0, 0.2, "", "", "M_{#pi^{0}} Fit #rho", "Normalised entries" ));
+    //hist1DParametersVec.push_back(Hist1DParameters("ePhoton", 0, 500, 100, 0, 1, "", "", "E_{#Sigma#gamma}", "Normalised entries" ));
+    //hist1DParametersVec.push_back(Hist1DParameters("mRhoRhoFit", 0.01, 2, 100, 0, 0.2, "", "", "mass of #rho Fit #rho", "Normalised entries" ));
+    //hist1DParametersVec.push_back(Hist1DParameters("mA1A1Fit", 0.01, 2, 100, 0, 0.2, "", "", "mass of a_{1} Fit a_{1}", "Normalised entries" ));
+    //hist1DParametersVec.push_back(Hist1DParameters("mVis", 0.0, 2, 200, 0, 1, "", "", "mass of visibles", "Normalised entries" ));
+    //hist1DParametersVec.push_back(Hist1DParameters("mPionChargeMod", 0.0, 2, 200, 0, 1, "", "", "M_{#pi^{+/-}} (mod)", "Normalised entries" ));
+    //hist1DParametersVec.push_back(Hist1DParameters("mPionCharge", 0.0, 2, 200, 0, 1, "", "", "M_{#pi^{+/-}}", "Normalised entries" ));
+    //hist1DParametersVec.push_back(Hist1DParameters("mChargeMod", 0.0, 2, 200, 0, 1, "", "", "mass of charged PFOs(mod)", "Normalised entries" ));
+    //hist1DParametersVec.push_back(Hist1DParameters("mCharge", 0.0, 2, 200, 0, 1, "", "", "mass of charged PFOs", "Normalised entries" ));
     //hist1DParametersVec.push_back(Hist1DParameters("mPhoton", 0, 10));
+    //hist1DParametersVec.push_back(Hist1DParameters("EEHCalRatio", 0.0, 1, 100, 0, 1, "", "", "E_{ECal}/E", "Normalised entries" ));
     
     //Hist1DParameters::Hist1DParameters(const TString &varName, const float xLow, const float xHigh, const int xBin, const float yLow, const float yHigh, 
     //const TString &drawOption, const TString &cuts, const TString &xAxis, const TString &yAxis):
@@ -415,15 +441,19 @@ int main(int argc, char* argv[]) {
             {
                 const TString &evtTypeCut(jIter->first);
                 const float weight(jIter->second);
-                const TString cuts(TString::Format("%f*(", weight) + ("" == hist1DParameters.m_cuts ? "" : hist1DParameters.m_cuts + " && ") + evtTypeCut + ")");
+                const TString cuts(TCut(hist1DParameters.m_cuts) + TCut(evtTypeCut) + parameters.m_commonCut);
+                const TString weightAndcuts(TString::Format("%f*(", weight) + cuts + ")");
                 const TString drawOption(hist1DParameters.m_drawOption + (parameters.m_evtTypeWeightMap.begin() != jIter ? "same" : "") );
 
-                parameters.m_pTChain->Draw(hist1DParameters.m_varName + ">>"+ safeName(TString::Itoa(counter, 10)) + padSize, cuts, drawOption);
+                parameters.m_pTChain->Draw(hist1DParameters.m_varName + ">>"+ safeName(TString::Itoa(counter, 10)) + padSize, weightAndcuts, drawOption);
                 TH1 *pTH1 = ((TH1*)gPad->GetPrimitive(TString::Itoa(counter, 10)));
                 (void) setHistStyle(pTH1, hist1DParameters, counter);
+                if (debugFlag)
+                    std::cout << parameters.m_name << " " << hist1DParameters.m_xAxis << " " << getName(evtTypeCut) << " RMS " << pTH1->GetRMS() << std::endl;
+                
                 legend->AddEntry(pTH1, getName(evtTypeCut), "f");
                 counter++;
-
+                
             }
             legend-> SetFillStyle(0);
             legend-> SetBorderSize(0);

@@ -179,6 +179,27 @@ inline void TTreeHelper::SetVar(const std::string &varName, const NumberType num
     return (this->IsFloat(number) ? this->SetDoubleVar(varName, number) : this->SetIntVar(varName, number));
 }
 
+//------------------------------------------------------------------------------------------------------------------------------------------
+
+template <typename NumberType> 
+inline NumberType TTreeHelper::GetVar(const std::string &varName) const
+{
+    if (m_strDoubleMap.find(varName) != m_strDoubleMap.end())
+    {
+        return m_strDoubleMap.at(varName);
+    }
+    else if (m_strIntMap.find(varName) != m_strIntMap.end())
+    {
+        return m_strIntMap.at(varName);
+    }
+    else
+    {
+        std::cout<<"TTreeHelper::GetVar error m_strDoubleMap or m_strIntMap do not have "<<varName<<std::endl;
+    }
+    return 0;
+}
+
+
 #endif
 
 

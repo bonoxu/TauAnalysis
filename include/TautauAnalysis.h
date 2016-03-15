@@ -7,14 +7,14 @@
 //#include <set>
 #include <map>
 
-#include "TTreeHelper.h"
-
 using namespace lcio;
 using namespace marlin;
 
 namespace EVENT { class LCEvent; class MCParticle;}
 #include <EVENT/ReconstructedParticle.h>
 namespace UTIL {class LCRelationNavigator;}
+
+class TTreeHelper;
 
 class TautauAnalysis : public Processor 
 {
@@ -131,25 +131,48 @@ protected:
      *  @brief Chi squared fit for rho 770
      * 
      *  @param inputPfoVec input particles
+     *  @param nPionChargeFit number of charged pion to fit
+     *  @param nPhotonFit number of photon to fit
      *  @param pionChargePfoVec output charged pions to receive
      *  @param photonPfoVec output pion to receive 
      * 
      *  @return Chi squared
      */
-    float Chi2FitRho770(const EVENT::ReconstructedParticleVec &inputPfoVec, EVENT::ReconstructedParticleVec &pionChargePfoVec, EVENT::ReconstructedParticleVec &photonPfoVec) const;
-    
+    float Chi2FitRho770(const EVENT::ReconstructedParticleVec &inputPfoVec, const int nPionChargeFit, const int nPhotonFit, 
+        EVENT::ReconstructedParticleVec &pionChargePfoVec, EVENT::ReconstructedParticleVec &photonPfoVec) const;    
     /**
      *  @brief Chi squared fit for a1 1260
      * 
      *  @param inputPfoVec input particles
+     *  @param nPionChargeFit number of charged pion to fit
+     *  @param nPhotonFitLhs number of photon to fit for first pion
+     *  @param nPhotonFitRhs number of photon to fit for second pion
      *  @param pionChargePfoVec output charged pions to receive
      *  @param photonPfoVecLhs output pion to receive 
      *  @param photonPfoVecRhs output pion to receive 
      * 
      *  @return Chi squared
      */
-    float Chi2FitA11260(const EVENT::ReconstructedParticleVec &inputPfoVec, EVENT::ReconstructedParticleVec &pionChargePfoVec, EVENT::ReconstructedParticleVec &photonPfoVecLhs,
-        EVENT::ReconstructedParticleVec &photonPfoVecRhs) const;
+    float Chi2FitA11260(const EVENT::ReconstructedParticleVec &inputPfoVec, const int nPionChargeFit, const int nPhotonFitLhs, const int nPhotonFitRhs,
+        EVENT::ReconstructedParticleVec &pionChargePfoVec, EVENT::ReconstructedParticleVec &photonPfoVecLhs, EVENT::ReconstructedParticleVec &photonPfoVecRhs) const;
+    
+    /**
+     *  @brief Get e cal resolution use 16.6%/sqrt(E) (+) 1.1% http://arxiv.org/pdf/1006.3396v1.pdf P106
+     * 
+     *  @param energy energy of the particle
+     * 
+     *  @return e cal resolution
+     */
+    float GetECalResolution(const float energy) const;
+    
+    /**
+     *  @brief Get tracking resolution use 2E-05 * Pt http://arxiv.org/pdf/1006.3396v1.pdf P53
+     * 
+     *  @param momentum momentum of the particle
+     * 
+     *  @return tracking resolution resolution
+     */
+    float GetTrackingResolution(const float momentum) const;
     
     int                     m_nRun;                             // The counter for number of runs
     int                     m_nEvent;                           // The counter for number of events
